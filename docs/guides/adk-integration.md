@@ -126,7 +126,7 @@ pip install opentelemetry-instrumentation-httpx
 
 ## Running the Full Stack
 
-See [`examples/adk-agent/launch.sh`](https://github.com/ItsNotRocketScience/candela/tree/main/examples/adk-agent) for a ready-to-run script. The components:
+See [`examples/adk-agent/launch.sh`](https://github.com/candelahq/candela/tree/main/examples/adk-agent) for a ready-to-run script. The components:
 
 | Component | Port | Role |
 |-----------|------|------|
@@ -177,6 +177,6 @@ Both `candela-sidecar` and `candela-server` support the same proxy routes. Choos
 
 ## Related Docs
 
-- [LLM Proxy](../sidecar/proxy.md) — All proxy routes, providers, and client integrations
+- [Sidecar Overview](../sidecar/index.md) — All proxy routes, providers, and client integrations
 - [OpenTelemetry](opentelemetry.md) — Collector setup, GenAI processor, and framework instrumentation
-- [Architecture](../architecture/index.md) — CQRS storage, fan-out, and ingestion pipeline
+- [Sidecar Configuration](../sidecar/configuration.md) — CQRS storage, fan-out, and ingestion pipeline

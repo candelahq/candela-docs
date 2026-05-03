@@ -1,8 +1,8 @@
 site_name: Candela Docs
 site_description: Documentation for the Candela observability platform — monitor, trace, and manage your LLM traffic.
 site_url: https://candelahq.com/docs # Update when domain is live
-repo_url: https://github.com/ItsNotRocketScience/candela-docs
-repo_name: ItsNotRocketScience/candela-docs
+repo_url: https://github.com/candelahq/candela-docs
+repo_name: candelahq/candela-docs
 edit_uri: edit/main/docs/
 
 theme:
@@ -88,7 +88,7 @@ markdown_extensions:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/ItsNotRocketScience
+      link: https://github.com/candelahq
   generator: false
 
 extra_css:
@@ -100,14 +100,20 @@ nav:
       - Overview: getting-started/index.md
       - Installation: getting-started/installation.md
       - Quick Start: getting-started/quickstart.md
-  - Desktop:
-      - Overview: desktop/index.md
-      - Provider Management: desktop/providers.md
-      - Trace Viewer: desktop/traces.md
+  - Components:
+      - candela-local: local/index.md
+      - candela-server: server/index.md
+      - candela-sidecar: sidecar/index.md
+      - candela-desktop: desktop/index.md
   - Sidecar:
       - Overview: sidecar/index.md
       - Configuration: sidecar/configuration.md
       - Deployment: sidecar/deployment.md
+  - Desktop:
+      - Overview: desktop/index.md
+      - Provider Management: desktop/providers.md
+      - Trace Viewer: desktop/traces.md
+  - Architecture: architecture/index.md
   - Guides:
       - ADK Integration: guides/adk-integration.md
       - OpenTelemetry: guides/opentelemetry.md

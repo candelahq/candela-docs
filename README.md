@@ -1,6 +1,6 @@
 # Candela Docs
 
-Documentation for the [Candela](https://github.com/ItsNotRocketScience) observability platform.
+Documentation for the [Candela](https://github.com/candelahq) observability platform.
 
 Built with [MkDocs Material](https://squidfunk.github.io/mkdocs-material/) and deployed to GitHub Pages.
 

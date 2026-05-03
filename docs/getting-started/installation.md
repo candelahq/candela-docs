@@ -4,7 +4,7 @@
 
 === "macOS"
 
-    Download the latest release from [GitHub Releases](https://github.com/ItsNotRocketScience/candela-desktop/releases):
+    Download the latest release from [GitHub Releases](https://github.com/candelahq/candela-desktop/releases):
 
     ```bash
     # Or install via Homebrew (coming soon)
@@ -15,14 +15,14 @@
 
     ```bash
     # Download the AppImage
-    curl -LO https://github.com/ItsNotRocketScience/candela-desktop/releases/latest/download/candela-desktop.AppImage
+    curl -LO https://github.com/candelahq/candela-desktop/releases/latest/download/candela-desktop.AppImage
     chmod +x candela-desktop.AppImage
     ./candela-desktop.AppImage
     ```
 
 === "Windows"
 
-    Download the installer from [GitHub Releases](https://github.com/ItsNotRocketScience/candela-desktop/releases).
+    Download the installer from [GitHub Releases](https://github.com/candelahq/candela-desktop/releases).
 
 ## Candela Sidecar
 
@@ -36,7 +36,7 @@
 
     ```bash
     # Download the latest binary for your platform
-    curl -LO https://github.com/ItsNotRocketScience/candela-sidecar/releases/latest/download/candela-sidecar-$(uname -s)-$(uname -m)
+    curl -LO https://github.com/candelahq/candela-sidecar/releases/latest/download/candela-sidecar-$(uname -s)-$(uname -m)
     chmod +x candela-sidecar-*
     sudo mv candela-sidecar-* /usr/local/bin/candela-sidecar
     ```
@@ -44,7 +44,7 @@
 === "From Source"
 
     ```bash
-    git clone https://github.com/ItsNotRocketScience/candela-sidecar.git
+    git clone https://github.com/candelahq/candela-sidecar.git
     cd candela-sidecar
     go build -o candela-sidecar ./cmd/sidecar
     ```
