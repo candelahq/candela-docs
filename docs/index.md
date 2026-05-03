@@ -11,7 +11,7 @@ title: Candela — LLM Observability Platform
 Candela is an open-source observability platform for LLM traffic — trace requests, monitor costs, and manage providers across your AI infrastructure.
 
 [Get Started](getting-started/index.md){ .md-button .md-button--primary }
-[View on GitHub](https://github.com/candelahq){ .md-button }
+[View on GitHub](https://github.com/candelahq/candela){ .md-button }
 
 </div>
 

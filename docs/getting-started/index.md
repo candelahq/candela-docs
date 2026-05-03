@@ -4,30 +4,42 @@ Welcome to Candela! This guide will help you get up and running with LLM observa
 
 ## What is Candela?
 
-Candela is an open-source observability platform that gives you full visibility into your LLM traffic. It consists of two main components:
+Candela is an open-source observability platform that gives you full visibility into your LLM traffic. It consists of four components:
 
 | Component | What it does |
 |---|---|
-| **Candela Desktop** | A Flutter desktop app for managing LLM providers, viewing traces, and monitoring costs |
-| **Candela Sidecar** | A lightweight Go proxy (< 5MB) that intercepts, traces, and routes LLM requests |
+| **candela-local** | Developer proxy + runtime manager — run local & cloud models with observability from your machine |
+| **candela-server** | Full backend — API server, LLM proxy, dashboard UI, deployed on Cloud Run |
+| **candela-sidecar** | Lightweight production proxy (< 5MB) for containers — traces, cost, budget enforcement |
+| **candela-desktop** | Flutter desktop app for managing providers and viewing traces |
 
 ## Choose Your Path
 
-=== "Local Development"
+=== "Solo Developer"
 
-    Use **Candela Desktop** to manage local LLM providers and view traces from your development machine.
+    Use **candela-local** for instant LLM observability on your machine — local models via Ollama, cloud models via ADC, all traced to SQLite.
 
-    [Install Desktop →](installation.md)
+    ```bash
+    go install github.com/candelahq/candela/cmd/candela-local@latest
+    ```
 
-=== "Production / Containers"
+    [candela-local docs →](../local/index.md)
 
-    Deploy the **Candela Sidecar** as a proxy next to your application containers for zero-touch LLM observability.
+=== "Team / Production"
 
-    [Deploy Sidecar →](../sidecar/deployment.md)
+    Deploy **candela-server** on Cloud Run with BigQuery storage, Firebase auth, and a dashboard UI. Developers connect via candela-local in Team Mode.
+
+    [candela-server docs →](../server/index.md)
+
+=== "Container Sidecar"
+
+    Drop **candela-sidecar** next to your application containers for zero-touch LLM tracing in production.
+
+    [candela-sidecar docs →](../sidecar/index.md)
 
 === "Google ADK"
 
-    Integrate Candela with your ADK agents for end-to-end distributed tracing.
+    Integrate Candela with your ADK agents for end-to-end distributed tracing with W3C Trace Context propagation.
 
     [ADK Integration →](../guides/adk-integration.md)
 
@@ -35,4 +47,4 @@ Candela is an open-source observability platform that gives you full visibility 
 
 1. [Install Candela](installation.md)
 2. [Quick Start — Send your first traced request](quickstart.md)
-3. [Explore the Desktop App](../desktop/index.md)
+3. [Explore candela-local](../local/index.md)

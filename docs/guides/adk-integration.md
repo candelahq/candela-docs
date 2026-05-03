@@ -95,7 +95,7 @@ Without trace correlation, the proxy spans would have a separate, unrelated trac
 """Full observability: proxy + OTel unified traces."""
 import os
 
-# ADK reads these natively (≥1.17.0) — no manual TracerProvider setup needed.
+# ADK reads these natively — no manual TracerProvider setup needed.
 os.environ.setdefault("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", "http://localhost:4318/v1/traces")
 os.environ.setdefault("OTEL_SERVICE_NAME", "my-adk-agent")
 os.environ.setdefault("OTEL_SEMCONV_STABILITY_OPT_IN", "gen_ai_latest_experimental")

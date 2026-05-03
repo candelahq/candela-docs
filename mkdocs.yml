@@ -1,8 +1,8 @@
 site_name: Candela Docs
 site_description: Documentation for the Candela observability platform — monitor, trace, and manage your LLM traffic.
 site_url: https://candelahq.com/docs # Update when domain is live
-repo_url: https://github.com/candelahq/candela-docs
-repo_name: candelahq/candela-docs
+repo_url: https://github.com/candelahq/candela
+repo_name: candelahq/candela
 edit_uri: edit/main/docs/
 
 theme:

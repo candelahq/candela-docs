@@ -1,58 +1,106 @@
 # Installation
 
-## Candela Desktop
+All Candela components live in the [candelahq/candela](https://github.com/candelahq/candela) monorepo.
 
-=== "macOS"
+## candela-local (Recommended Start)
 
-    Download the latest release from [GitHub Releases](https://github.com/candelahq/candela-desktop/releases):
+The fastest way to get started — a developer proxy that manages local and cloud models with built-in observability.
 
-    ```bash
-    # Or install via Homebrew (coming soon)
-    brew install --cask candela
-    ```
-
-=== "Linux"
+=== "go install"
 
     ```bash
-    # Download the AppImage
-    curl -LO https://github.com/candelahq/candela-desktop/releases/latest/download/candela-desktop.AppImage
-    chmod +x candela-desktop.AppImage
-    ./candela-desktop.AppImage
-    ```
-
-=== "Windows"
-
-    Download the installer from [GitHub Releases](https://github.com/candelahq/candela-desktop/releases).
-
-## Candela Sidecar
-
-=== "Docker"
-
-    ```bash
-    docker pull ghcr.io/itsnotrocketscience/candela-sidecar:latest
-    ```
-
-=== "Binary"
-
-    ```bash
-    # Download the latest binary for your platform
-    curl -LO https://github.com/candelahq/candela-sidecar/releases/latest/download/candela-sidecar-$(uname -s)-$(uname -m)
-    chmod +x candela-sidecar-*
-    sudo mv candela-sidecar-* /usr/local/bin/candela-sidecar
+    go install github.com/candelahq/candela/cmd/candela-local@latest
     ```
 
 === "From Source"
 
     ```bash
-    git clone https://github.com/candelahq/candela-sidecar.git
-    cd candela-sidecar
-    go build -o candela-sidecar ./cmd/sidecar
+    git clone https://github.com/candelahq/candela.git
+    cd candela
+    nix develop   # or ensure Go 1.26+ is installed
+    go run ./cmd/candela-local
     ```
 
-## Verify Installation
+### Configure
+
+Create `~/.candela.yaml`:
+
+```yaml
+runtime_backend: ollama
+port: 8181
+lm_studio_port: 1234
+```
+
+!!! tip "Solo + Cloud"
+    Add `providers` and `vertex_ai` to also route cloud models (Gemini, Claude) through candela-local. See [candela-local docs](../local/index.md).
+
+---
+
+## candela-server
+
+The full backend with dashboard UI, deployed on Cloud Run.
 
 ```bash
-candela-sidecar --version
+git clone https://github.com/candelahq/candela.git
+cd candela
+
+# Run locally
+nix develop -c go run ./cmd/candela-server
+```
+
+See [candela-server docs](../server/index.md) for Cloud Run deployment with Terraform.
+
+---
+
+## candela-sidecar
+
+Lightweight production proxy for container environments.
+
+=== "Docker"
+
+    ```bash
+    docker pull ghcr.io/candelahq/candela-sidecar:latest
+    ```
+
+=== "Binary"
+
+    ```bash
+    go install github.com/candelahq/candela/cmd/candela-sidecar@latest
+    ```
+
+=== "From Source"
+
+    ```bash
+    git clone https://github.com/candelahq/candela.git
+    cd candela
+    go build -o candela-sidecar ./cmd/candela-sidecar
+    ```
+
+See [candela-sidecar docs](../sidecar/index.md) for Kubernetes and Cloud Run deployment.
+
+---
+
+## candela-desktop
+
+Flutter desktop app for provider management and trace visualization.
+
+Download from [GitHub Releases](https://github.com/candelahq/candela-desktop/releases).
+
+See [candela-desktop docs](../desktop/index.md).
+
+---
+
+## Verify
+
+```bash
+# candela-local
+candela-local --help
+
+# candela-server
+curl http://localhost:8181/healthz
+
+# candela-sidecar
+candela-sidecar --help
 ```
 
 !!! success "You're ready!"

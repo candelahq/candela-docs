@@ -1,7 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
-  <circle cx="32" cy="32" r="28" fill="#7c3aed" opacity="0.15"/>
-  <path d="M32 16 C32 16 28 28 28 36 C28 40.4 29.8 44 32 44 C34.2 44 36 40.4 36 36 C36 28 32 16 32 16Z" fill="#7c3aed"/>
-  <circle cx="32" cy="14" r="3" fill="#f59e0b"/>
-  <path d="M29 14 Q32 8 35 14" stroke="#f59e0b" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-  <path d="M27 13 Q32 5 37 13" stroke="#f59e0b" stroke-width="1" fill="none" stroke-linecap="round" opacity="0.5"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 48" fill="none">
+  <!-- Candle icon -->
+  <path d="M18 12 C18 12 15 20 15 26 C15 29.3 16.3 32 18 32 C19.7 32 21 29.3 21 26 C21 20 18 12 18 12Z" fill="white"/>
+  <circle cx="18" cy="11" r="2.5" fill="#fbbf24"/>
+  <path d="M15.5 10 Q18 5 20.5 10" stroke="#fbbf24" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+  <!-- Text -->
+  <text x="32" y="28" font-family="Inter, system-ui, sans-serif" font-size="22" font-weight="700" fill="white" letter-spacing="0.5">Candela</text>
 </svg>
