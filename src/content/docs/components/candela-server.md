@@ -12,7 +12,7 @@ description: Full-featured Candela backend with dashboard UI and team management
 | **LLM Proxy** | Multi-provider routing (OpenAI, Gemini, Anthropic via Vertex AI) |
 | **Span Ingestion** | CQRS storage with DuckDB, SQLite, BigQuery backends |
 | **Cost Engine** | Real-time token counting and cost calculation |
-| **Budget Enforcement** | Per-user spending limits via Firestore |
+| **Budget Enforcement** _(optional)_ | Per-user spending limits and alerts |
 | **Dashboard** | Next.js UI for traces, costs, and admin |
 | **Auth** | Firebase Auth, Google ID tokens, OAuth2 access tokens |
 

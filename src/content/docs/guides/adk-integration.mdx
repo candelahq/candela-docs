@@ -5,7 +5,7 @@ description: Route Google ADK agent LLM calls through Candela for observability 
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-Route Google ADK agent LLM calls through Candela for instant observability — tokens, cost, latency, and budget enforcement — with unified trace correlation.
+Route Google ADK agent LLM calls through Candela for instant observability — tokens, cost, latency — with unified trace correlation.
 
 ## Quick Start (Proxy Only)
 
@@ -38,7 +38,7 @@ ADK's `Gemini` class passes `base_url` directly to `google.genai.Client(http_opt
 | Token usage (input/output/total) | Parsed from Gemini response |
 | Cost (USD) | Calculated by Candela's cost engine |
 | Latency & TTFB | Measured at the proxy |
-| Budget enforcement | Per-user budget gating |
+| Budget enforcement _(optional)_ | Per-user budget gating |
 | Request/response content | Captured for debugging |
 
 ---
@@ -103,7 +103,7 @@ The httpx instrumentor must be active before ADK creates its httpx client. Setti
 
 | Component | Port | Role |
 |-----------|------|------|
-| `candela-sidecar` | 8080 | LLM proxy (tokens, cost, budget, trace correlation) |
+| `candela-sidecar` | 8080 | LLM proxy (tokens, cost, trace correlation) |
 | Candela Collector | 4317 / 4318 | OTel span ingestion + GenAI cost enrichment |
 | `adk web` | 8000 | ADK dev server |
 
