@@ -87,7 +87,7 @@ Pricing can be updated at runtime via the Go API (useful for dynamic pricing fro
 ```go
 calc.SetPricing(costcalc.ModelPricing{
     Provider:        "google",
-    Model:           "gemini-3.0-ultra",
+    Model:           "gemini-2.5-pro",
     InputPerMillion:  5.00,
     OutputPerMillion: 25.00,
 })

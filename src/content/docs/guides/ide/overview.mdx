@@ -13,12 +13,12 @@ Most AI-powered IDEs and tools talk to LLMs via the **OpenAI-compatible API** (`
 
 ```
 IDE / Tool                   candela-local                    Provider
-┌──────────┐   `:1234`   ┌──────────────────┐   ADC/key   ┌──────────┐
-│ Cline    │ ──────────▶ │ /v1/completions  │ ──────────▶ │ Gemini   │
-│ Zed      │             │ /v1/models       │             │ OpenAI   │
-│ IntelliJ │             │                  │             │ Ollama   │
-│ OpenCode │             │  trace + cost    │             │ Claude   │
-└──────────┘             └──────────────────┘             └──────────┘
+┌──────────┐   `:1234`   ┌──────────────────────┐   ADC/key   ┌──────────┐
+│ Cline    │ ──────────▶ │ /v1/chat/completions │ ──────────▶ │ Gemini   │
+│ Zed      │             │ /v1/models           │             │ OpenAI   │
+│ IntelliJ │             │                      │             │ Ollama   │
+│ OpenCode │             │  trace + cost        │             │ Claude   │
+└──────────┘             └──────────────────────┘             └──────────┘
 ```
 
 **What you get automatically:**
