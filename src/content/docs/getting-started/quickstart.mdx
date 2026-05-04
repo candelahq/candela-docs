@@ -1,0 +1,101 @@
+---
+title: Quick Start
+description: Send your first traced LLM request in under 5 minutes.
+---
+
+import { Tabs, TabItem, Steps } from '@astrojs/starlight/components';
+
+<Steps>
+
+1. **Start candela-local**
+
+   ```bash
+   candela-local
+   ```
+
+   This starts two listeners:
+   - `:8181` — Management UI + proxy
+   - `:1234` — LM-compatible endpoint (works with JetBrains, Cline, Continue)
+
+2. **Send a request through Candela**
+
+   Route LLM requests through candela-local instead of calling providers directly:
+
+   <Tabs>
+     <TabItem label="curl">
+       ```bash
+       curl http://localhost:1234/v1/chat/completions \
+         -H "Content-Type: application/json" \
+         -d '{
+           "model": "llama3.2:3b",
+           "messages": [{"role": "user", "content": "Hello, Candela!"}]
+         }'
+       ```
+     </TabItem>
+     <TabItem label="Python (OpenAI)">
+       ```python
+       from openai import OpenAI
+
+       client = OpenAI(
+           base_url="http://localhost:1234/v1",
+           api_key="candela",  # placeholder — candela-local handles auth
+       )
+
+       response = client.chat.completions.create(
+           model="llama3.2:3b",
+           messages=[{"role": "user", "content": "Hello, Candela!"}],
+       )
+       print(response.choices[0].message.content)
+       ```
+     </TabItem>
+     <TabItem label="Google ADK">
+       ```python
+       from google.adk.agents import Agent
+       from google.adk.models import Gemini
+
+       agent = Agent(
+           model=Gemini(
+               model="gemini-2.0-flash",
+               base_url="http://localhost:8181/proxy/google",
+           ),
+           name="my_agent",
+           instruction="You are a helpful assistant.",
+       )
+       ```
+     </TabItem>
+     <TabItem label="Go">
+       ```go
+       client := openai.NewClient(
+           option.WithBaseURL("http://localhost:1234/v1"),
+           option.WithAPIKey("candela"),
+       )
+       ```
+     </TabItem>
+   </Tabs>
+
+3. **View the trace**
+
+   Open **http://localhost:8181/_local/** and check the **Traces** card:
+
+   - ⏱️ **Latency** — End-to-end request duration and TTFB
+   - 📊 **Token usage** — Input and output token counts
+   - 💰 **Cost estimate** — Based on provider pricing
+   - 🔗 **Trace context** — W3C Trace Context propagation
+
+4. **Discover models**
+
+   ```bash
+   curl http://localhost:1234/v1/models | jq '.data[].id'
+   ```
+
+   Returns all available models — local (Ollama) and cloud (Gemini, Claude) merged into one list.
+
+</Steps>
+
+---
+
+:::tip[What's next?]
+- [Configure cloud models](/candela-docs/components/candela-local/) in Solo + Cloud mode
+- [Deploy to production](/candela-docs/components/candela-sidecar/) with candela-sidecar
+- [Integrate with Google ADK](/candela-docs/guides/adk-integration/) for distributed tracing
+:::

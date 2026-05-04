@@ -1,0 +1,102 @@
+---
+title: Installation
+description: Install Candela components from the monorepo.
+---
+
+import { Tabs, TabItem, Steps } from '@astrojs/starlight/components';
+
+All Candela components live in the [candelahq/candela](https://github.com/candelahq/candela) monorepo.
+
+## candela-local (Recommended Start)
+
+The fastest way to get started — a developer proxy that manages local and cloud models with built-in observability.
+
+<Tabs>
+  <TabItem label="go install">
+    ```bash
+    go install github.com/candelahq/candela/cmd/candela-local@latest
+    ```
+  </TabItem>
+  <TabItem label="From Source">
+    ```bash
+    git clone https://github.com/candelahq/candela.git
+    cd candela
+    nix develop   # or ensure Go 1.26+ is installed
+    go run ./cmd/candela-local
+    ```
+  </TabItem>
+</Tabs>
+
+### Configure
+
+Create `~/.candela.yaml`:
+
+```yaml
+runtime_backend: ollama
+port: 8181
+lm_studio_port: 1234
+```
+
+:::tip[Solo + Cloud]
+Add `providers` and `vertex_ai` to also route cloud models (Gemini, Claude) through candela-local. See [candela-local docs](/candela-docs/components/candela-local/).
+:::
+
+---
+
+## candela-server
+
+The full backend with dashboard UI, deployed on Cloud Run.
+
+```bash
+git clone https://github.com/candelahq/candela.git
+cd candela
+nix develop -c go run ./cmd/candela-server
+```
+
+See [candela-server docs](/candela-docs/components/candela-server/) for Cloud Run deployment with Terraform.
+
+---
+
+## candela-sidecar
+
+Lightweight production proxy for container environments.
+
+<Tabs>
+  <TabItem label="Docker">
+    ```bash
+    docker pull ghcr.io/candelahq/candela-sidecar:latest
+    ```
+  </TabItem>
+  <TabItem label="Binary">
+    ```bash
+    go install github.com/candelahq/candela/cmd/candela-sidecar@latest
+    ```
+  </TabItem>
+  <TabItem label="From Source">
+    ```bash
+    git clone https://github.com/candelahq/candela.git
+    cd candela
+    go build -o candela-sidecar ./cmd/candela-sidecar
+    ```
+  </TabItem>
+</Tabs>
+
+---
+
+## candela-desktop
+
+Flutter desktop app for provider management and trace visualization.
+
+Download from [GitHub Releases](https://github.com/candelahq/candela-desktop/releases).
+
+---
+
+## Verify
+
+```bash
+candela-local --help
+```
+
+:::note[You're ready!]
+Head to the [Quick Start](/candela-docs/getting-started/quickstart/) to send your first traced LLM request.
+:::

@@ -1,0 +1,86 @@
+/* ── Candela brand tokens ── */
+:root {
+  --sl-font: 'Inter', system-ui, -apple-system, sans-serif;
+  --sl-font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Deep purple accent matching the flame glow */
+  --sl-color-accent-low: #1e1145;
+  --sl-color-accent: #7c3aed;
+  --sl-color-accent-high: #c4b5fd;
+
+  /* Warmer background for dark mode */
+  --sl-color-bg-nav: #0f0a1a;
+  --sl-color-bg-sidebar: #0f0a1a;
+  --sl-color-hairline-shade: rgba(124, 58, 237, 0.15);
+}
+
+:root[data-theme='light'] {
+  --sl-color-accent-low: #ede9fe;
+  --sl-color-accent: #7c3aed;
+  --sl-color-accent-high: #4c1d95;
+  --sl-color-bg-nav: #faf5ff;
+  --sl-color-bg-sidebar: #faf5ff;
+}
+
+/* ── Hero section polish ── */
+.hero {
+  padding-block: 3rem !important;
+}
+
+.hero .tagline {
+  font-size: var(--sl-text-lg) !important;
+  color: var(--sl-color-gray-2);
+}
+
+/* ── Card styling ── */
+.card {
+  border: 1px solid var(--sl-color-hairline-shade);
+  border-radius: 0.75rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  border-color: var(--sl-color-accent);
+  box-shadow: 0 0 20px rgba(124, 58, 237, 0.1);
+}
+
+/* ── Code blocks ── */
+.expressive-code {
+  border-radius: 0.75rem;
+}
+
+/* ── Sidebar active state ── */
+[data-current="true"] > a {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(124, 58, 237, 0.05)) !important;
+  border-radius: 0.375rem;
+}
+
+/* ── Logo sizing ── */
+.site-title img {
+  height: 2rem;
+}
+
+/* ── Smooth page transitions ── */
+main {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Better table styling ── */
+table {
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+th {
+  background: var(--sl-color-accent-low) !important;
+}
+
+/* ── Steps component ── */
+.sl-steps > li::before {
+  background: var(--sl-color-accent) !important;
+}

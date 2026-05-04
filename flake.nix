@@ -1,8 +1,8 @@
 {
-  description = "Candela Docs - MkDocs Material documentation site";
+  description = "Candela docs — Astro Starlight";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
@@ -14,16 +14,14 @@
       {
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
-            python312
-            uv
+            nodejs_22
             git
           ];
 
           shellHook = ''
-            echo "🕯️ Candela Docs dev shell"
-            echo "  Run: uv sync && uv run mkdocs serve"
+            echo "🕯️ Candela Docs dev shell (Starlight)"
+            echo "  Run: npm install && npm run dev"
           '';
         };
-      }
-    );
+      });
 }

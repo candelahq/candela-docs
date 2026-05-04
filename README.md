@@ -1,36 +1,24 @@
-# Candela Docs
+# 🕯️ Candela Docs
 
-Documentation for the [Candela](https://github.com/candelahq) observability platform.
+Documentation for the [Candela](https://github.com/candelahq/candela) observability platform, built with [Astro Starlight](https://starlight.astro.build).
 
-Built with [MkDocs Material](https://squidfunk.github.io/mkdocs-material/) and deployed to GitHub Pages.
-
-## Local Development
+## Development
 
 ```bash
-# Enter Nix dev shell
-nix develop
-
-# Install dependencies
-uv sync
-
-# Start dev server
-uv run mkdocs serve
+npm install
+npm run dev
 ```
 
-Then open [http://localhost:8000](http://localhost:8000).
+Open http://localhost:4321/candela-docs/
+
+## Build
+
+```bash
+npm run build
+```
+
+Output is in `dist/`.
 
 ## Deployment
 
-Docs are automatically deployed to GitHub Pages on push to `main` via GitHub Actions.
-
-## Structure
-
-```
-docs/
-├── index.md                    # Homepage
-├── getting-started/            # Installation & quickstart
-├── desktop/                    # Candela Desktop docs
-├── sidecar/                    # Candela Sidecar docs
-├── guides/                     # Integration guides
-└── api/                        # API reference
-```
+Pushes to `main` auto-deploy to GitHub Pages via the `.github/workflows/deploy.yml` action.

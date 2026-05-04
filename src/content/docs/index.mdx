@@ -1,0 +1,65 @@
+---
+title: Candela — LLM Observability Platform
+description: See what your LLMs are doing. Open-source observability for LLM traffic.
+template: splash
+hero:
+  tagline: Open-source observability for LLM traffic. Trace requests, monitor costs, and manage providers across your entire AI infrastructure.
+  image:
+    alt: Candela — a candle with a neural-network flame
+    file: ../../assets/logo.png
+  actions:
+    - text: Get Started
+      link: /candela-docs/getting-started/overview/
+      icon: right-arrow
+      variant: primary
+    - text: View on GitHub
+      link: https://github.com/candelahq/candela
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+## What You Get
+
+<CardGrid stagger>
+  <Card title="End-to-End Traces" icon="magnifier">
+    Every LLM request captured with OpenTelemetry — latency, TTFB, token counts, and cost — all in a unified trace tree with W3C Trace Context propagation.
+  </Card>
+  <Card title="Multi-Provider Routing" icon="setting">
+    Route to OpenAI, Gemini, Anthropic, Ollama, and LM Studio through a single endpoint. Smart routing picks the right backend automatically.
+  </Card>
+  <Card title="Cost Intelligence" icon="approve-check-circle">
+    Real-time cost calculation per request, per model, per user. Set budgets and get alerts before they're exceeded.
+  </Card>
+  <Card title="Drop-In Integration" icon="puzzle">
+    Works with Google ADK, LangChain, LiteLLM, raw HTTP — anything that talks to an LLM endpoint. Point `base_url` at Candela and you're done.
+  </Card>
+</CardGrid>
+
+---
+
+## Choose Your Component
+
+<CardGrid>
+  <LinkCard
+    title="candela-local"
+    description="Developer proxy + runtime manager. Run local & cloud models with built-in observability."
+    href="/candela-docs/components/candela-local/"
+  />
+  <LinkCard
+    title="candela-server"
+    description="Full backend with dashboard UI, BigQuery storage, budget enforcement, and team RBAC."
+    href="/candela-docs/components/candela-server/"
+  />
+  <LinkCard
+    title="candela-sidecar"
+    description="Lightweight < 5MB proxy for production containers. Pub/Sub + OTLP export."
+    href="/candela-docs/components/candela-sidecar/"
+  />
+  <LinkCard
+    title="candela-desktop"
+    description="Flutter desktop app for provider management and trace visualization."
+    href="/candela-docs/components/candela-desktop/"
+  />
+</CardGrid>

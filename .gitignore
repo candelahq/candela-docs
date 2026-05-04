@@ -1,21 +1,5 @@
-# Python / uv
-.venv/
-__pycache__/
-*.pyc
-.python-version
-
-# MkDocs build output
-site/
-
-# IDE
-.idea/
-.vscode/
-*.swp
-*.swo
-
-# OS
+node_modules/
+dist/
+.astro/
 .DS_Store
-Thumbs.db
-
-# Nix
-result
+*.swp
