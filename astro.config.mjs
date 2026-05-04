@@ -10,7 +10,7 @@ export default defineConfig({
 			logo: {
 				src: './src/assets/logo.png',
 			},
-			favicon: '/favicon.ico',
+			favicon: '/favicon.png',
 			social: [
 				{ icon: 'github', label: 'GitHub', href: 'https://github.com/candelahq/candela' },
 			],
