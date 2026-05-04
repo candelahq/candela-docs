@@ -5,7 +5,7 @@ description: Configure per-user spending limits, grants, alerts, and rate limiti
 
 import { Tabs, TabItem, Steps } from '@astrojs/starlight/components';
 
-Candela provides a complete cost governance system — per-user daily budgets, one-time grants, threshold alerts, rate limiting, and an immutable audit trail. All budget data lives in **Firestore** and is enforced at the proxy layer in real time.
+Candela provides a complete cost governance system — per-user daily budgets, one-time grants, threshold alerts, rate limiting, and an immutable audit trail. Budget enforcement happens at the proxy layer in real time.
 
 ## How It Works
 
@@ -159,7 +159,7 @@ When a $0.50 LLM call completes:
 1. Check active grants (sorted by `expires_at` ascending)
 2. Deduct from earliest-expiring grant until spent or grant exhausted
 3. Remaining cost → daily budget
-4. All updates are **transactional** (Firestore transaction)
+4. All updates are **transactional**
 
 ```
 Cost: $0.50
@@ -208,7 +208,7 @@ Per-user rate limiting prevents runaway automation from draining budgets:
 |---------|---------|-------|
 | `rate_limit` | 60 req/min | Per user |
 
-Rate limits are stored as minute-window counters in Firestore with a 2-minute TTL.
+Rate limits use minute-window counters with a 2-minute TTL.
 
 ### Configuring Per-User Limits
 
@@ -244,15 +244,3 @@ buf curl --protocol connect \
   -d '{"user_id": "alice@example.com", "limit": 20}'
 ```
 
----
-
-## Firestore Data Model
-
-```
-users/{email}                          → UserRecord
-users/{email}/budgets/{period_key}     → BudgetRecord  (e.g. "2026-05-04")
-users/{email}/grants/{grant_id}        → GrantRecord
-users/{email}/audit/{audit_id}         → AuditRecord
-global_audit/{audit_id}                → AuditRecord   (survives user deletion)
-rate_limit/{email}:{window_key}        → Counter        (TTL: 2 min)
-```
