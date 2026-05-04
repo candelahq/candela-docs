@@ -62,5 +62,5 @@ flutter run -d macos  # or linux, windows
 
 ## Related
 
-- [candela-local](/candela-docs/components/candela-local/) — Local proxy that Desktop can connect to
-- [candela-server](/candela-docs/components/candela-server/) — Cloud backend for team features
+- [candela-local](/components/candela-local/) — Local proxy that Desktop can connect to
+- [candela-server](/components/candela-server/) — Cloud backend for team features

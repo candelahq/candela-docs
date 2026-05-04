@@ -62,7 +62,7 @@ This enables unified traces across ADK → sidecar → LLM provider.
 
 | Framework | How to Integrate |
 |-----------|-----------------|
-| **Google ADK** | Set `base_url` + OTel env vars. See [ADK Integration](/candela-docs/guides/adk-integration/) |
+| **Google ADK** | Set `base_url` + OTel env vars. See [ADK Integration](/guides/adk-integration/) |
 | **LangChain** | Point `base_url` at Candela; enable `opentelemetry-instrumentation-httpx` |
 | **LiteLLM** | Set `api_base` to Candela endpoint |
 | **Raw HTTP** | Add `traceparent` header for trace correlation |

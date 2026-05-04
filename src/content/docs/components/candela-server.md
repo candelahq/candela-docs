@@ -70,6 +70,6 @@ cd terraform && terraform apply
 
 ## Related
 
-- [candela-local](/candela-docs/components/candela-local/) — Developer proxy that connects to this server in Team Mode
-- [candela-sidecar](/candela-docs/components/candela-sidecar/) — Lightweight production proxy alternative
-- [Architecture](/candela-docs/architecture/storage/) — CQRS storage design
+- [candela-local](/components/candela-local/) — Developer proxy that connects to this server in Team Mode
+- [candela-sidecar](/components/candela-sidecar/) — Lightweight production proxy alternative
+- [Architecture](/architecture/storage/) — CQRS storage design

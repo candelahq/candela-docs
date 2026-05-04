@@ -120,5 +120,5 @@ curl http://localhost:8080/healthz
 
 ## Related
 
-- [ADK Integration](/candela-docs/guides/adk-integration/) — Route ADK agents through the sidecar
-- [Architecture](/candela-docs/architecture/storage/) — Storage backend details
+- [ADK Integration](/guides/adk-integration/) — Route ADK agents through the sidecar
+- [Architecture](/architecture/storage/) — Storage backend details
