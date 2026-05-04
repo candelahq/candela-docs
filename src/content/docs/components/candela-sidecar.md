@@ -3,7 +3,7 @@ title: candela-sidecar
 description: Lightweight production proxy for container environments.
 ---
 
-The Candela Sidecar is a lightweight Go proxy (< 5MB) built for production container environments. It provides LLM request proxying, OpenTelemetry tracing, and cost calculation with minimal overhead. Budget enforcement is optionally available.
+The Candela Sidecar is a lightweight Go proxy (< 5MB) built for production container environments. It provides LLM request proxying, OpenTelemetry tracing, and cost calculation with minimal overhead. Budget enforcement is optional via Firestore — omit it to run in observability-only mode.
 
 ## Key Features
 
