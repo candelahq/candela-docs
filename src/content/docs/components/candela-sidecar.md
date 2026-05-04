@@ -3,7 +3,7 @@ title: candela-sidecar
 description: Lightweight production proxy for container environments.
 ---
 
-The Candela Sidecar is a lightweight Go proxy (< 5MB) built for production container environments. It provides LLM request proxying, OpenTelemetry tracing, cost calculation, and budget enforcement with minimal overhead.
+The Candela Sidecar is a lightweight Go proxy (< 5MB) built for production container environments. It provides LLM request proxying, OpenTelemetry tracing, and cost calculation with minimal overhead. Budget enforcement is optional via Firestore — omit it to run in observability-only mode.
 
 ## Key Features
 
@@ -11,7 +11,7 @@ The Candela Sidecar is a lightweight Go proxy (< 5MB) built for production conta
 - **W3C Trace Context propagation** — `traceparent`/`tracestate` headers
 - **Async span export** via Google Cloud Pub/Sub or OTLP
 - **Cost calculation** with the shared `costcalc` engine
-- **Budget enforcement** via Firestore
+- **Budget enforcement** _(optional)_ — enable for per-user spending limits, or omit for observability-only mode
 - **Single static binary** — < 5MB, no runtime dependencies
 
 ## Supported Providers
@@ -33,7 +33,7 @@ Environment variables:
 | `PUBSUB_TOPIC` | | Pub/Sub topic for span export |
 | `OTLP_ENDPOINT` | | OTLP HTTP endpoint for span export |
 | `PORT` | | Listen port (default: `8080`) |
-| `FIRESTORE_DB` | | Firestore database for budget enforcement |
+| `BUDGET_DB` | | Budget store connection string _(omit to disable budget enforcement)_ |
 
 ## Deployment
 
@@ -108,7 +108,7 @@ spec:
 | **Best for** | Containers, CI, production | Local dev with UI |
 | **Size** | < 5MB binary | Full server |
 | **Storage** | Pub/Sub + OTLP export | DuckDB, SQLite, BigQuery |
-| **Budget enforcement** | Yes (via Firestore) | Yes (via local store) |
+| **Budget enforcement** | Optional | Yes |
 | **UI** | None | Dashboard at `:3000` |
 | **Default port** | `:8080` | `:8181` |
 
