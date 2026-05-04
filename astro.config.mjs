@@ -62,6 +62,18 @@ export default defineConfig({
 					items: [
 						{ label: 'ADK Integration', slug: 'guides/adk-integration' },
 						{ label: 'OpenTelemetry', slug: 'guides/opentelemetry' },
+						{ label: 'Budgets & Cost Control', slug: 'guides/budgets' },
+						{ label: 'Pricing', slug: 'guides/pricing' },
+						{
+							label: 'IDE Integration',
+							items: [
+								{ label: 'Overview', slug: 'guides/ide/overview' },
+								{ label: 'OpenCode', slug: 'guides/ide/opencode' },
+								{ label: 'Zed', slug: 'guides/ide/zed' },
+								{ label: 'Cline / Continue', slug: 'guides/ide/cline' },
+								{ label: 'JetBrains AI', slug: 'guides/ide/jetbrains' },
+							],
+						},
 					],
 				},
 				{

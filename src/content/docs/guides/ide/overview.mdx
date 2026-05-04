@@ -1,0 +1,84 @@
+---
+title: IDE & Developer Tool Integration
+description: Connect any AI-powered IDE or tool to Candela for LLM observability.
+---
+
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+Candela acts as a transparent LLM proxy — any tool that lets you configure a custom `base_url` or API endpoint can route through Candela for full observability.
+
+## How It Works
+
+Most AI-powered IDEs and tools talk to LLMs via the **OpenAI-compatible API** (`/v1/chat/completions`, `/v1/models`). `candela-local` exposes this on port `:1234` — just point your tool there.
+
+```
+IDE / Tool                   candela-local                    Provider
+┌──────────┐   `:1234`   ┌──────────────────────┐   ADC/key   ┌──────────┐
+│ Cline    │ ──────────▶ │ /v1/chat/completions │ ──────────▶ │ Gemini   │
+│ Zed      │             │ /v1/models           │             │ OpenAI   │
+│ IntelliJ │             │                      │             │ Ollama   │
+│ OpenCode │             │  trace + cost        │             │ Claude   │
+└──────────┘             └──────────────────────┘             └──────────┘
+```
+
+**What you get automatically:**
+- ⏱️ Latency and TTFB per request
+- 📊 Token counts (input / output / total)
+- 💰 Cost calculation per request
+- 🔗 Trace correlation (if the tool supports `traceparent`)
+- 📋 Full request/response content capture
+
+## Generic Setup
+
+For any tool that supports a custom OpenAI-compatible endpoint:
+
+| Setting | Value |
+|---------|-------|
+| **Base URL** | `http://localhost:1234/v1` |
+| **API Key** | `candela` (or any string — candela-local handles real auth) |
+| **Model** | Any model from `GET /v1/models` |
+
+```bash
+# Verify it works
+curl http://localhost:1234/v1/models | jq '.data[].id'
+```
+
+This returns all available models — local (Ollama) and cloud (Gemini, Claude) merged.
+
+## IDE-Specific Guides
+
+<CardGrid>
+  <LinkCard
+    title="OpenCode"
+    description="Terminal-native AI coding agent with MCP support."
+    href="/guides/ide/opencode/"
+  />
+  <LinkCard
+    title="Zed"
+    description="High-performance multiplayer editor with AI assistant."
+    href="/guides/ide/zed/"
+  />
+  <LinkCard
+    title="Cline"
+    description="Autonomous AI coding agent for VS Code."
+    href="/guides/ide/cline/"
+  />
+  <LinkCard
+    title="JetBrains AI"
+    description="IntelliJ IDEA, WebStorm, GoLand, and friends."
+    href="/guides/ide/jetbrains/"
+  />
+</CardGrid>
+
+## Verifying the Connection
+
+After configuring your IDE, check the management UI:
+
+1. Open **http://localhost:8181/_local/**
+2. Navigate to the **Traces** card
+3. Send a prompt from your IDE
+4. You should see the trace appear with model, tokens, cost, and duration
+
+:::tip[Model discovery]
+If your IDE supports model selection from a dropdown (JetBrains, Continue), it will auto-populate from Candela's `/v1/models` endpoint — showing both local and cloud models in one list.
+:::
