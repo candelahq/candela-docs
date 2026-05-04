@@ -1,0 +1,4 @@
+pre-push:
+  commands:
+    build:
+      run: npm run build
