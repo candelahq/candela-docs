@@ -12,18 +12,30 @@ Welcome to Candela! This guide will help you get up and running with LLM observa
 Candela is an open-source observability platform that gives you full visibility into your LLM traffic. It consists of four components:
 
 <CardGrid>
-  <Card title="candela-local" icon="laptop">
-    Developer proxy + runtime manager — run local & cloud models with observability from your machine.
-  </Card>
-  <Card title="candela-server" icon="cloud">
-    Full backend — API server, LLM proxy, dashboard UI, deployed on Cloud Run.
-  </Card>
-  <Card title="candela-sidecar" icon="rocket">
-    Lightweight production proxy (&lt; 5MB) for containers — traces, cost, optional budget enforcement.
-  </Card>
-  <Card title="candela-desktop" icon="setting">
-    Flutter desktop app for managing providers and viewing traces.
-  </Card>
+  <LinkCard
+    title="candela-local"
+    description="Developer proxy + runtime manager — run local & cloud models with observability from your machine."
+    href="/components/candela-local/"
+    icon="laptop"
+  />
+  <LinkCard
+    title="candela-server"
+    description="Full backend — API server, LLM proxy, dashboard UI, deployed on Cloud Run."
+    href="/components/candela-server/"
+    icon="cloud"
+  />
+  <LinkCard
+    title="candela-sidecar"
+    description="Lightweight production proxy (< 5MB) for containers — traces, cost, optional budget enforcement."
+    href="/components/candela-sidecar/"
+    icon="rocket"
+  />
+  <LinkCard
+    title="candela-desktop"
+    description="Flutter desktop app — manage providers and view traces."
+    href="/components/candela-desktop/"
+    icon="setting"
+  />
 </CardGrid>
 
 ## Choose Your Path
