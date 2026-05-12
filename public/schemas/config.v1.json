@@ -94,6 +94,15 @@
             "properties": {
               "provider": {
                 "type": "string",
+                "enum": [
+                  "google",
+                  "anthropic",
+                  "openai",
+                  "gemini",
+                  "ollama",
+                  "vllm",
+                  "lmstudio"
+                ],
                 "description": "Provider name (must match a configured provider)."
               },
               "model": {
@@ -118,14 +127,28 @@
       "additionalProperties": false
     }
   },
-  "if": {
-    "required": ["remote"],
-    "properties": {
-      "remote": { "type": "string", "minLength": 1 }
+  "allOf": [
+    {
+      "if": {
+        "required": ["remote"],
+        "properties": { "remote": { "type": "string", "minLength": 1 } }
+      },
+      "then": { "required": ["audience"] }
+    },
+    {
+      "if": {
+        "required": ["providers"],
+        "properties": {
+          "providers": {
+            "contains": {
+              "properties": { "name": { "enum": ["google", "anthropic", "gemini"] } },
+              "required": ["name"]
+            }
+          }
+        }
+      },
+      "then": { "required": ["vertex_ai"] }
     }
-  },
-  "then": {
-    "required": ["audience"]
-  },
+  ],
   "additionalProperties": false
 }
