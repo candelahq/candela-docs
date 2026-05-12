@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://candelahq.com/schemas/config.v1.json",
+  "title": "Candela Configuration",
+  "description": "Configuration for Candela LLM observability proxy (~/.config/candela/config.yaml)",
+  "type": "object",
+  "properties": {
+    "config_version": {
+      "type": "integer",
+      "const": 1,
+      "description": "Config schema version. Must be 1 for this schema."
+    },
+    "remote": {
+      "type": "string",
+      "format": "uri",
+      "description": "Remote Candela server URL. When set, enables team mode with IAP authentication.",
+      "examples": ["https://candela.example.com"]
+    },
+    "audience": {
+      "type": "string",
+      "description": "IAP OAuth audience. Defaults to the remote URL if omitted. Required when remote is set."
+    },
+    "port": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535,
+      "default": 8181,
+      "description": "Local proxy port. Tools (Zed, OpenCode, etc.) connect here."
+    },
+    "lmstudio_port": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535,
+      "default": 1234,
+      "description": "LM Studio compatibility listener port. IntelliJ's 'Enable LM Studio' connects here."
+    },
+    "providers": {
+      "type": "array",
+      "description": "LLM providers to enable. Cloud providers require vertex_ai config; local providers require the runtime to be installed.",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "enum": [
+              "google",
+              "anthropic",
+              "openai",
+              "gemini",
+              "ollama",
+              "vllm",
+              "lmstudio"
+            ],
+            "description": "Provider identifier. Cloud: google, anthropic, openai, gemini. Local: ollama, vllm, lmstudio."
+          },
+          "models": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Model IDs to expose for this provider (e.g. gemini-2.5-pro, claude-sonnet-4-20250514)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "vertex_ai": {
+      "type": "object",
+      "description": "Google Cloud Vertex AI configuration. Required for google/anthropic/gemini providers.",
+      "properties": {
+        "project": {
+          "type": "string",
+          "description": "GCP project ID (e.g. my-gcp-project). Required for cloud providers.",
+          "pattern": "^[a-z][a-z0-9-]{4,28}[a-z0-9]$"
+        },
+        "region": {
+          "type": "string",
+          "default": "us-central1",
+          "description": "Vertex AI region. Claude models are available in us-east5.",
+          "examples": ["us-central1", "us-east5", "europe-west1"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "pricing": {
+      "type": "object",
+      "description": "Per-model pricing overrides for accurate cost tracking.",
+      "properties": {
+        "models": {
+          "type": "array",
+          "description": "Custom per-model rates. Overrides built-in default pricing.",
+          "items": {
+            "type": "object",
+            "required": ["provider", "model", "input_per_million", "output_per_million"],
+            "properties": {
+              "provider": {
+                "type": "string",
+                "description": "Provider name (must match a configured provider)."
+              },
+              "model": {
+                "type": "string",
+                "description": "Model ID (e.g. gpt-4o, gemini-2.5-pro)."
+              },
+              "input_per_million": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Cost per million input tokens in USD."
+              },
+              "output_per_million": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Cost per million output tokens in USD."
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "if": {
+    "required": ["remote"],
+    "properties": {
+      "remote": { "type": "string", "minLength": 1 }
+    }
+  },
+  "then": {
+    "required": ["audience"]
+  },
+  "additionalProperties": false
+}
