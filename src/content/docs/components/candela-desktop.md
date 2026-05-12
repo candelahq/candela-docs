@@ -17,7 +17,19 @@ Candela Desktop is a Flutter-based desktop application for managing LLM provider
 
 ## Installation
 
-Download the latest release for your platform from [GitHub Releases](https://github.com/candelahq/candela-desktop/releases).
+### macOS (Recommended)
+
+```bash
+brew install --cask candelahq/tap/candela
+```
+
+:::tip
+The Homebrew cask handles Gatekeeper quarantine automatically. If you download the `.dmg` manually, you may need to run `xattr -cr /Applications/Candela.app`.
+:::
+
+### All Platforms
+
+Download the latest release from [GitHub Releases](https://github.com/candelahq/candela-desktop/releases).
 
 | Platform | Format |
 |----------|--------|
