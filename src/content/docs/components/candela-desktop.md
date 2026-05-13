@@ -3,7 +3,7 @@ title: candela-desktop
 description: Flutter desktop app for provider management, trace visualization, and CLI lifecycle management.
 ---
 
-Candela Desktop is a native macOS application for managing LLM providers, visualizing distributed traces, and orchestrating the `candela` CLI proxy.
+Candela Desktop is a native application for managing LLM providers, visualizing distributed traces, and orchestrating the `candela` CLI proxy.
 
 ## Features
 
@@ -17,7 +17,7 @@ Candela Desktop is a native macOS application for managing LLM providers, visual
 | **CLI Install/Upgrade** | Detects missing CLI, offers one-click `brew install`, shows upgrade banners |
 | **Self-Update** | Upgrade Desktop via `brew upgrade --cask` from the system tray |
 | **Dark/Light Mode** | Adaptive UI with system theme detection |
-| **Secure Storage** | API keys stored in macOS Keychain |
+| **Secure Storage** | API keys stored in the system's secure storage (macOS Keychain, Windows DPAPI, or Linux libsecret) |
 
 ## Installation
 
@@ -90,11 +90,11 @@ The trace viewer displays a waterfall view of distributed traces:
 ## Upgrade
 
 ```bash
-# Upgrade Desktop
-brew upgrade --cask candela-desktop
+# Upgrade Desktop (macOS)
+brew upgrade --cask candelahq/tap/candela-desktop
 
 # Upgrade CLI
-brew upgrade candela
+brew upgrade candelahq/tap/candela
 ```
 
 ## Development
