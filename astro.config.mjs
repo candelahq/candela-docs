@@ -64,6 +64,7 @@ export default defineConfig({
 						{ label: 'OpenTelemetry', slug: 'guides/opentelemetry' },
 						{ label: 'Budgets & Cost Control', slug: 'guides/budgets' },
 						{ label: 'Pricing', slug: 'guides/pricing' },
+						{ label: 'Enrichment SDKs', slug: 'guides/enrichment-sdks' },
 						{
 							label: 'IDE Integration',
 							items: [
