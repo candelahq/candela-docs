@@ -129,7 +129,7 @@ SELECT
     SUM(gen_ai_output_tokens)              AS output_tokens,
     SUM(gen_ai_cost_usd)                   AS cost_usd
 FROM spans
-WHERE start_time >= NOW() - INTERVAL 30 DAY
+WHERE start_time >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 30 DAY)
 GROUP BY 1
 ORDER BY cost_usd DESC;
 ```
