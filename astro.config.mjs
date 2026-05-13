@@ -65,6 +65,7 @@ export default defineConfig({
 						{ label: 'Budgets & Cost Control', slug: 'guides/budgets' },
 						{ label: 'Pricing', slug: 'guides/pricing' },
 						{ label: 'Enrichment SDKs', slug: 'guides/enrichment-sdks' },
+						{ label: 'Multitenancy', slug: 'guides/multitenancy' },
 						{
 							label: 'IDE Integration',
 							items: [
@@ -73,6 +74,8 @@ export default defineConfig({
 								{ label: 'Zed', slug: 'guides/ide/zed' },
 								{ label: 'Cline / Continue', slug: 'guides/ide/cline' },
 								{ label: 'JetBrains AI', slug: 'guides/ide/jetbrains' },
+								{ label: 'Claude Code', slug: 'guides/ide/claude-code' },
+								{ label: 'Cursor / Windsurf', slug: 'guides/ide/cursor' },
 							],
 						},
 					],
@@ -82,6 +85,8 @@ export default defineConfig({
 					items: [
 						{ label: 'Storage & CQRS', slug: 'architecture/storage' },
 						{ label: 'Deployment', slug: 'architecture/deployment' },
+						{ label: 'Security & Auth', slug: 'architecture/security' },
+						{ label: 'Operations', slug: 'architecture/operations' },
 					],
 				},
 				{

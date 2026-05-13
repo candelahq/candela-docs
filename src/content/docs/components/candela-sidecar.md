@@ -21,6 +21,9 @@ The Candela Sidecar is a lightweight Go proxy (< 5MB) built for production conta
 | `/proxy/google/*` | Google Gemini (native format) | ADC |
 | `/proxy/openai/*` | OpenAI API | API key in config |
 | `/proxy/anthropic/*` | Anthropic (via Vertex AI) | ADC |
+| `/proxy/anthropic-vertex/*` | Anthropic (native Vertex AI, for Claude Code) | ADC |
+| `/proxy/anthropic-direct/*` | Anthropic (direct to api.anthropic.com) | Client API key |
+| `/proxy/gemini-oai/*` | Google Gemini (OpenAI-compatible format) | ADC |
 
 ## Configuration
 
