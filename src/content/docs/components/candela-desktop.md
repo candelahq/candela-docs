@@ -9,7 +9,9 @@ Candela Desktop is a native application for managing LLM providers, visualizing 
 
 | Feature | Description |
 |---------|-------------|
+| **Today View** | At-a-glance dashboard showing today's LLM spend, request count, and top models — auto-refreshes every 30s |
 | **Provider Dashboard** | Connect and monitor OpenAI, Google Gemini, Anthropic (Vertex), Ollama, vLLM, LM Studio |
+| **Traces Screen** | Full-screen trace browser with search, filtering, and span-level detail — mirrors the web UI |
 | **Trace Viewer** | Waterfall view with span hierarchy, timing, token counts, and cost |
 | **Config Editor** | Live YAML editor for `~/.config/candela/config.yaml` with validation |
 | **Mode Switcher** | Toggle between Solo, Solo + Cloud, and Team modes |
