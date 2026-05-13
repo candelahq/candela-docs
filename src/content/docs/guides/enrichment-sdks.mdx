@@ -64,7 +64,10 @@ The SDKs are convenience wrappers. You can always set `X-Candela-Tenant-Id` and 
 
   <TabItem label="Go">
     ```go
-    import "github.com/candelahq/candela/sdks/go"
+    import (
+        "net/http"
+        candela "github.com/candelahq/candela/sdks/go"
+    )
 
     // Wrap any http.RoundTripper
     client := &http.Client{
@@ -98,7 +101,7 @@ The SDKs are convenience wrappers. You can always set `X-Candela-Tenant-Id` and 
   <TabItem label="Rust">
     ```toml
     [dependencies]
-    candela-sdk = { path = "sdks/rust" }
+    candela-sdk = "0.1"
     ```
 
     ```rust
@@ -165,28 +168,29 @@ All IDs are validated on construction — invalid IDs throw immediately rather t
 ```
 Valid:    acme-corp, trial_NCT01750580, customer.42
 Invalid:  has spaces!, <script>, "" (empty)
-Pattern:  ^[a-zA-Z0-9\-._]{1,128}$
+Pattern:  ^[a-zA-Z0-9._-]{1,128}$
 ```
 
 ---
 
 ## Using with Google ADK
 
-ADK agents are already OTel-instrumented and propagate W3C Baggage automatically. The SDK's Baggage entries flow through ADK's `httpx` client → sidecar without additional configuration:
+ADK agents use `httpx` under the hood. Create a `CandelaSession` and pass its pre-configured `httpx_client()` to ADK's model — the SDK injects Baggage headers on every outgoing request:
 
 ```python
-import os
+import httpx
 from candela import CandelaSession
 from google.adk.agents import Agent
 from google.adk.models import Gemini
 
 session = CandelaSession(tenant_id="pharma-co", job_id="ctm-trial-abc")
 
-# ADK reads base_url, SDK injects Baggage via httpx
+# Pass the SDK's httpx client so enrichment headers are injected on every call
 agent = Agent(
     model=Gemini(
         model="gemini-2.5-flash",
         base_url="http://localhost:8080/proxy/google",
+        http_client=session.httpx_client(),
     ),
     name="clinical_agent",
     instruction="You are a clinical trial analyst.",

@@ -124,22 +124,19 @@ For multitenant applications, combine ADK's proxy routing with the [Candela Enri
 
 ```python
 """ADK + Enrichment SDK: per-tenant cost attribution."""
-import os
 from candela import CandelaSession
 from google.adk.agents import Agent
 from google.adk.models import Gemini
 
-os.environ.setdefault("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", "http://localhost:4318/v1/traces")
-os.environ.setdefault("OTEL_SERVICE_NAME", "clinical-agent")
-
 # SDK validates IDs and generates headers
 session = CandelaSession(tenant_id="pharma-co", job_id="ctm-trial-NCT01750580")
 
-# ADK + enrichment in one setup
+# Pass session's httpx client so enrichment headers are injected on every call
 root_agent = Agent(
     model=Gemini(
         model="gemini-2.5-flash",
         base_url="http://localhost:8080/proxy/google",
+        http_client=session.httpx_client(),
     ),
     name="clinical_agent",
     instruction="You are a clinical trial analyst.",
