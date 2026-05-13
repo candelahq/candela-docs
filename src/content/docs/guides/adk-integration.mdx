@@ -118,6 +118,42 @@ The httpx instrumentor must be active before ADK creates its httpx client. Setti
 
 ---
 
+## Cost Attribution with Enrichment SDKs
+
+For multitenant applications, combine ADK's proxy routing with the [Candela Enrichment SDK](/guides/enrichment-sdks/) to attribute LLM costs to specific tenants and jobs:
+
+```python
+"""ADK + Enrichment SDK: per-tenant cost attribution."""
+import os
+from candela import CandelaSession
+from google.adk.agents import Agent
+from google.adk.models import Gemini
+
+os.environ.setdefault("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", "http://localhost:4318/v1/traces")
+os.environ.setdefault("OTEL_SERVICE_NAME", "clinical-agent")
+
+# SDK validates IDs and generates headers
+session = CandelaSession(tenant_id="pharma-co", job_id="ctm-trial-NCT01750580")
+
+# ADK + enrichment in one setup
+root_agent = Agent(
+    model=Gemini(
+        model="gemini-2.5-flash",
+        base_url="http://localhost:8080/proxy/google",
+    ),
+    name="clinical_agent",
+    instruction="You are a clinical trial analyst.",
+)
+```
+
+The sidecar reads the enrichment headers and records `tenant_id` and `job_id` on every span — visible in the dashboard's **Tenant Leaderboard** and **Job Leaderboard** views.
+
+:::tip[No SDK needed for simple cases]
+If you just need to tag all requests from a single service, set the headers directly in the environment or via `httpx` defaults. The SDK shines when you need per-request tenant/job switching.
+:::
+
+---
+
 ## Troubleshooting
 
 | Symptom | Cause | Fix |
@@ -127,3 +163,5 @@ The httpx instrumentor must be active before ADK creates its httpx client. Setti
 | `401 Unauthorized` from sidecar | Missing ADC credentials | Run `gcloud auth application-default login` |
 | Cost shows $0.00 | Unknown model in pricing table | Check collector logs for missing pricing |
 | ADK import error for `Gemini` | Old ADK version | `pip install --upgrade google-adk` |
+| Tenant/job not showing in dashboard | Enrichment headers not injected | Use the [Enrichment SDK](/guides/enrichment-sdks/) or set `X-Candela-Tenant-Id` manually |
+
