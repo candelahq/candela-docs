@@ -22,7 +22,7 @@ Edit your OpenCode config (`~/.config/opencode/config.json` or project-level `.o
 
 ### Using Cloud Models
 
-For cloud models routed through candela-local in Solo + Cloud mode:
+For cloud models routed through candela in Solo + Cloud mode:
 
 ```json
 {
@@ -35,7 +35,7 @@ For cloud models routed through candela-local in Solo + Cloud mode:
 }
 ```
 
-candela-local handles Vertex AI authentication via ADC — no API key needed.
+candela handles Vertex AI authentication via ADC — no API key needed.
 
 ### Using Local Models
 
@@ -55,8 +55,8 @@ For Ollama models running locally:
 ## Verifying
 
 ```bash
-# Start candela-local
-candela-local
+# Start candela
+candela start
 
 # In another terminal, start OpenCode
 opencode

@@ -51,7 +51,7 @@ export default defineConfig({
 				{
 					label: 'Components',
 					items: [
-						{ label: 'candela-local', slug: 'components/candela-local' },
+						{ label: 'candela', slug: 'components/candela' },
 						{ label: 'candela-server', slug: 'components/candela-server' },
 						{ label: 'candela-sidecar', slug: 'components/candela-sidecar' },
 						{ label: 'candela-desktop', slug: 'components/candela-desktop' },

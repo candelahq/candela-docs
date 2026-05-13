@@ -1,11 +1,11 @@
 ---
-title: candela-local
+title: candela
 description: Developer proxy and runtime manager for local and cloud LLM models.
 ---
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-`candela-local` is a lightweight binary that runs on a developer's machine. It provides:
+`candela` is a lightweight binary that runs on a developer's machine. It provides:
 
 - **Unified model discovery** — one endpoint for local _and_ cloud models
 - **Smart routing** — automatically sends requests to the right backend
@@ -19,7 +19,7 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 **For**: Individual developers who want to run local models with full observability and zero cloud dependencies.
 
 ```yaml
-# ~/.candela.yaml — Solo Mode
+# ~/.config/candela/config.yaml — Solo Mode
 port: 8181
 lm_studio_port: 1234
 runtime_backend: ollama
@@ -39,7 +39,7 @@ runtime_backend: ollama
 **For**: Individual developers who want local _and_ cloud models (Gemini, Claude) without deploying a Candela server. Uses **Google ADC** — the same identity you already have.
 
 ```yaml
-# ~/.candela.yaml — Solo + Cloud
+# ~/.config/candela/config.yaml — Solo + Cloud
 runtime_backend: ollama
 
 providers:
@@ -86,7 +86,7 @@ JetBrains / Cline / curl
 **For**: Teams that need **budgeting, governance, and RBAC** via a shared Candela cloud backend.
 
 ```yaml
-# ~/.candela.yaml — Team Mode
+# ~/.config/candela/config.yaml — Team Mode
 port: 8181
 lm_studio_port: 1234
 runtime_backend: ollama
@@ -104,12 +104,12 @@ audience: "12345678.apps.googleusercontent.com"
 <Tabs>
   <TabItem label="Homebrew">
     ```bash
-    brew install candelahq/tap/candela-local
+    brew install candelahq/tap/candela
     ```
   </TabItem>
   <TabItem label="go install">
     ```bash
-    go install github.com/candelahq/candela/cmd/candela-local@latest
+    go install github.com/candelahq/candela/cmd/candela@latest
     ```
   </TabItem>
   <TabItem label="From Source">
@@ -117,7 +117,7 @@ audience: "12345678.apps.googleusercontent.com"
     git clone https://github.com/candelahq/candela.git
     cd candela
     nix develop
-    go run ./cmd/candela-local
+    go run ./cmd/candela
     ```
   </TabItem>
 </Tabs>

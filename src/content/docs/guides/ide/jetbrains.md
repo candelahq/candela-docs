@@ -3,15 +3,15 @@ title: JetBrains AI
 description: Connect IntelliJ IDEA, WebStorm, GoLand, and other JetBrains IDEs to Candela.
 ---
 
-JetBrains IDEs (IntelliJ IDEA, WebStorm, GoLand, PyCharm, etc.) include an **AI Assistant** with LM Studio integration that speaks the OpenAI-compatible API. Since `candela-local` listens on the same port (`:1234`), it works with zero additional configuration.
+JetBrains IDEs (IntelliJ IDEA, WebStorm, GoLand, PyCharm, etc.) include an **AI Assistant** with LM Studio integration that speaks the OpenAI-compatible API. Since `candela` listens on the same port (`:1234`), it works with zero additional configuration.
 
 ## Zero-Config Setup
 
-`candela-local` is designed to be a drop-in replacement for LM Studio's API endpoint. JetBrains IDEs auto-detect models from `http://localhost:1234/v1/models`.
+`candela` is designed to be a drop-in replacement for LM Studio's API endpoint. JetBrains IDEs auto-detect models from `http://localhost:1234/v1/models`.
 
-1. **Start candela-local**:
+1. **Start candela**:
    ```bash
-   candela-local
+   candela start
    ```
 
 2. **Open JetBrains Settings**:
@@ -58,8 +58,8 @@ If you're using the [JetBrains AI Studio](https://plugins.jetbrains.com/plugin/2
 
 ## Multiple IDE Instances
 
-If you run multiple JetBrains IDEs simultaneously (e.g., GoLand + WebStorm), they all share the same `candela-local` instance on `:1234`. Traces from all IDEs appear in the same management UI.
+If you run multiple JetBrains IDEs simultaneously (e.g., GoLand + WebStorm), they all share the same `candela` instance on `:1234`. Traces from all IDEs appear in the same management UI.
 
 :::tip[Port 1234 is intentional]
-candela-local uses `:1234` specifically because it's the standard LM Studio port. Most JetBrains AI features are already configured to look there — no changes needed.
+candela uses `:1234` specifically because it's the standard LM Studio port. Most JetBrains AI features are already configured to look there — no changes needed.
 :::

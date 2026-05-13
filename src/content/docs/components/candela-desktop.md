@@ -20,7 +20,7 @@ Candela Desktop is a Flutter-based desktop application for managing LLM provider
 ### macOS (Recommended)
 
 ```bash
-brew install --cask candelahq/tap/candela
+brew install --cask candelahq/tap/candela-desktop
 ```
 
 :::tip
@@ -51,7 +51,7 @@ Each provider is configured with:
 - Display name and endpoint URL
 - API key (securely stored in OS keychain)
 - Model selection and parameters
-- Optional proxy routing through candela-local or candela-sidecar
+- Optional proxy routing through candela or candela-sidecar
 
 ## Trace Viewer
 
@@ -74,5 +74,5 @@ flutter run -d macos  # or linux, windows
 
 ## Related
 
-- [candela-local](/components/candela-local/) — Local proxy that Desktop can connect to
+- [candela](/components/candela/) — Local proxy that Desktop can connect to
 - [candela-server](/components/candela-server/) — Cloud backend for team features

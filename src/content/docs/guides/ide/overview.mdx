@@ -9,10 +9,10 @@ Candela acts as a transparent LLM proxy — any tool that lets you configure a c
 
 ## How It Works
 
-Most AI-powered IDEs and tools talk to LLMs via the **OpenAI-compatible API** (`/v1/chat/completions`, `/v1/models`). `candela-local` exposes this on port `:1234` — just point your tool there.
+Most AI-powered IDEs and tools talk to LLMs via the **OpenAI-compatible API** (`/v1/chat/completions`, `/v1/models`). `candela` exposes this on port `:1234` — just point your tool there.
 
 ```
-IDE / Tool                   candela-local                    Provider
+IDE / Tool                   candela                          Provider
 ┌──────────┐   `:1234`   ┌──────────────────────┐   ADC/key   ┌──────────┐
 │ Cline    │ ──────────▶ │ /v1/chat/completions │ ──────────▶ │ Gemini   │
 │ Zed      │             │ /v1/models           │             │ OpenAI   │
@@ -35,7 +35,7 @@ For any tool that supports a custom OpenAI-compatible endpoint:
 | Setting | Value |
 |---------|-------|
 | **Base URL** | `http://localhost:1234/v1` |
-| **API Key** | `candela` (or any string — candela-local handles real auth) |
+| **API Key** | `candela` (or any string — candela handles real auth) |
 | **Model** | Any model from `GET /v1/models` |
 
 ```bash

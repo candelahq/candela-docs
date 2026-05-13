@@ -3,7 +3,7 @@ title: Proxy Routes
 description: API reference for Candela proxy endpoints.
 ---
 
-All Candela proxy components (`candela-local`, `candela-server`, `candela-sidecar`) expose the same route structure.
+All Candela proxy components (`candela`, `candela-server`, `candela-sidecar`) expose the same route structure.
 
 ## Provider Routes
 
@@ -15,7 +15,7 @@ All Candela proxy components (`candela-local`, `candela-server`, `candela-sideca
 
 ## OpenAI-Compatible Endpoint
 
-`candela-local` exposes an LM Studio-compatible endpoint on `:1234`:
+`candela` exposes an LM Studio-compatible endpoint on `:1234`:
 
 | Route | Description |
 |-------|-------------|
@@ -30,7 +30,7 @@ GET /healthz
 
 Returns `200 OK` with `{"status": "ok"}`.
 
-## Management API (candela-local only)
+## Management API (candela only)
 
 | Route | Description |
 |-------|-------------|
