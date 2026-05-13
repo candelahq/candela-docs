@@ -8,10 +8,10 @@ description: Production deployment topology for the Candela platform.
 ```
                     ┌─────────────────────┐
 Developer Machine   │  OpenCode / Zed     │
-                    │  JetBrains / Cursor  │
-                    │        │             │
-                    │  candela              │
-                    │  (:8181 / :1234)     │
+                    │  JetBrains / Cursor │
+                    │        │            │
+                    │  candela            │
+                    │  (:8181 / :1234)    │
                     └────────┬────────────┘
                              │ Bearer token (OIDC via ADC)
                              ▼
