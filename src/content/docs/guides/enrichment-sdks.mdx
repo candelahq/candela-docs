@@ -1,0 +1,211 @@
+---
+title: Enrichment SDKs
+description: Language-specific SDKs for propagating tenant and job metadata through Candela for multitenant cost attribution.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+Candela ships **zero-dependency enrichment SDKs** for five languages. Each SDK injects `X-Candela-*` headers and W3C Baggage entries into your LLM requests — giving you per-tenant, per-job cost attribution automatically.
+
+:::tip[No SDK required]
+The SDKs are convenience wrappers. You can always set `X-Candela-Tenant-Id` and `X-Candela-Job-Id` headers manually, or use W3C Baggage (`candela.tenant_id`, `candela.job_id`) if your app is already OTel-instrumented.
+:::
+
+## Quick Start
+
+<Tabs>
+  <TabItem label="Python">
+    ```bash
+    pip install candela-sdk
+    ```
+
+    ```python
+    from openai import OpenAI
+    from candela import CandelaSession
+
+    session = CandelaSession(tenant_id="acme-corp", job_id="eval-42")
+
+    client = OpenAI(
+        base_url="http://localhost:1234/v1",
+        http_client=session.httpx_client(),
+    )
+
+    response = client.chat.completions.create(
+        model="gemini-2.5-pro",
+        messages=[{"role": "user", "content": "Hello!"}],
+    )
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript">
+    ```bash
+    npm install @candelahq/sdk
+    ```
+
+    ```typescript
+    import { CandelaSession } from "@candelahq/sdk";
+    import OpenAI from "openai";
+
+    const session = new CandelaSession({
+      tenantId: "acme-corp",
+      jobId: "eval-42",
+    });
+
+    // With OpenAI SDK
+    const client = new OpenAI({
+      baseURL: "http://localhost:1234/v1",
+      defaultHeaders: session.headers(),
+    });
+
+    // Or wrap fetch directly
+    const cfetch = session.wrapFetch(fetch);
+    ```
+  </TabItem>
+
+  <TabItem label="Go">
+    ```go
+    import (
+        "net/http"
+        candela "github.com/candelahq/candela/sdks/go"
+    )
+
+    // Wrap any http.RoundTripper
+    client := &http.Client{
+        Transport: candela.NewTransport(nil,
+            candela.WithTenantID("acme-corp"),
+            candela.WithJobID("eval-42"),
+        ),
+    }
+
+    // All requests through this client carry enrichment headers.
+    resp, err := client.Do(req)
+    ```
+  </TabItem>
+
+  <TabItem label="Kotlin">
+    ```kotlin
+    import com.candelahq.sdk.CandelaSession
+
+    val session = CandelaSession(
+        tenantId = "acme-corp",
+        jobId = "eval-42",
+    )
+
+    // Use with any HTTP client
+    val headers = session.headers()
+    // headers["X-Candela-Tenant-Id"] == "acme-corp"
+    // headers["Baggage"] == "candela.tenant_id=acme-corp,candela.job_id=eval-42"
+    ```
+  </TabItem>
+
+  <TabItem label="Rust">
+    ```toml
+    [dependencies]
+    candela-sdk = "0.1"
+    ```
+
+    ```rust
+    use candela_sdk::CandelaSession;
+
+    let session = CandelaSession::builder()
+        .tenant_id("acme-corp")
+        .job_id("eval-42")
+        .build()?;
+
+    let headers = session.headers();
+    // Use with reqwest, hyper, or any HTTP client
+    ```
+  </TabItem>
+</Tabs>
+
+---
+
+## What Gets Injected
+
+Every SDK call produces the same set of headers, regardless of language:
+
+| Header | Example Value | Purpose |
+|--------|---------------|---------|
+| `X-Candela-Tenant-Id` | `acme-corp` | Explicit tenant for cost attribution |
+| `X-Candela-Job-Id` | `eval-42` | Job/experiment grouping |
+| `Baggage` | `candela.tenant_id=acme-corp,candela.job_id=eval-42` | W3C standard propagation |
+
+The proxy reads **both** — Baggage has priority, explicit headers are the fallback. The SDKs set both for maximum compatibility.
+
+---
+
+## Architecture
+
+```
+Your App → SDK injects headers → Candela Proxy → LLM Provider
+                ↓
+    X-Candela-Tenant-Id: acme-corp
+    X-Candela-Job-Id: eval-42
+    Baggage: candela.tenant_id=acme-corp,candela.job_id=eval-42
+                ↓
+    Proxy strips X-Candela-* before forwarding to LLM
+    Proxy records tenant_id + job_id in the span
+```
+
+The proxy **strips all `X-Candela-*` headers** before forwarding to the upstream LLM — your metadata never leaks to providers.
+
+---
+
+## API Reference
+
+All SDKs expose the same three primitives:
+
+| Primitive | Description |
+|-----------|-------------|
+| `CandelaSession` | Reusable session with validated tenant/job IDs. Returns headers for any HTTP client. |
+| `injectHeaders` | One-shot function that mutates a headers dict/map with enrichment metadata. |
+| `validateId` | Validates an ID against the allowed pattern: `[a-zA-Z0-9._-]{1,128}`. |
+
+### ID Validation
+
+All IDs are validated on construction — invalid IDs throw immediately rather than failing silently at the proxy:
+
+```
+Valid:    acme-corp, trial_NCT01750580, customer.42
+Invalid:  has spaces!, <script>, "" (empty)
+Pattern:  ^[a-zA-Z0-9._-]{1,128}$
+```
+
+---
+
+## Using with Google ADK
+
+ADK agents use `httpx` under the hood. Create a `CandelaSession` and pass its pre-configured `httpx_client()` to ADK's model — the SDK injects Baggage headers on every outgoing request:
+
+```python
+import httpx
+from candela import CandelaSession
+from google.adk.agents import Agent
+from google.adk.models import Gemini
+
+session = CandelaSession(tenant_id="pharma-co", job_id="ctm-trial-abc")
+
+# Pass the SDK's httpx client so enrichment headers are injected on every call
+agent = Agent(
+    model=Gemini(
+        model="gemini-2.5-flash",
+        base_url="http://localhost:8080/proxy/google",
+        http_client=session.httpx_client(),
+    ),
+    name="clinical_agent",
+    instruction="You are a clinical trial analyst.",
+)
+```
+
+See [ADK Integration](/guides/adk-integration/) for full OTel trace correlation setup.
+
+---
+
+## Troubleshooting
+
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| `ValueError: invalid tenant_id` | ID contains spaces or special chars | Use only `[a-zA-Z0-9._-]`, max 128 chars |
+| Tenant shows as empty in dashboard | SDK not installed / headers not injected | Verify with `curl -v` that `X-Candela-Tenant-Id` appears |
+| Baggage not propagating | Existing Baggage header clobbered | SDKs append, never overwrite — check for middleware that resets headers |
+| Cost attribution missing | Proxy not configured to parse enrichment | Ensure candela-local ≥ v0.2.0 or candela-sidecar ≥ v0.4.0 |
