@@ -1,19 +1,23 @@
 ---
 title: candela-desktop
-description: Flutter desktop app for provider management and trace visualization.
+description: Flutter desktop app for provider management, trace visualization, and CLI lifecycle management.
 ---
 
-Candela Desktop is a Flutter-based desktop application for managing LLM providers and visualizing distributed traces.
+Candela Desktop is a native macOS application for managing LLM providers, visualizing distributed traces, and orchestrating the `candela` CLI proxy.
 
 ## Features
 
 | Feature | Description |
 |---------|-------------|
-| **Provider Management** | Add, configure, and switch between LLM providers |
-| **Trace Viewer** | Visualize distributed traces with span details |
-| **Cost Monitoring** | Track token usage and estimated costs per request |
-| **Secure Storage** | API keys stored in the OS keychain (macOS Keychain, Windows DPAPI, Linux libsecret) |
+| **Provider Dashboard** | Connect and monitor OpenAI, Google Gemini, Anthropic (Vertex), Ollama, vLLM, LM Studio |
+| **Trace Viewer** | Waterfall view with span hierarchy, timing, token counts, and cost |
+| **Config Editor** | Live YAML editor for `~/.config/candela/config.yaml` with validation |
+| **Mode Switcher** | Toggle between Solo, Solo + Cloud, and Team modes |
+| **Auto-Start Proxy** | Starts the `candela` CLI proxy on launch if installed but not running |
+| **CLI Install/Upgrade** | Detects missing CLI, offers one-click `brew install`, shows upgrade banners |
+| **Self-Update** | Upgrade Desktop via `brew upgrade --cask` from the system tray |
 | **Dark/Light Mode** | Adaptive UI with system theme detection |
+| **Secure Storage** | API keys stored in macOS Keychain |
 
 ## Installation
 
@@ -37,13 +41,33 @@ Download the latest release from [GitHub Releases](https://github.com/candelahq/
 | Linux | `.AppImage` |
 | Windows | `.exe` installer |
 
+## CLI Integration
+
+Candela Desktop works best alongside the [`candela` CLI](/components/candela/):
+
+```bash
+brew install candelahq/tap/candela
+```
+
+On launch, Desktop automatically:
+
+1. **Detects** whether the `candela` CLI is installed via Homebrew
+2. **Installs** it with a one-click banner if missing
+3. **Starts** the proxy in the background if installed but not running
+4. **Checks for updates** and shows an upgrade banner when a newer CLI version is available
+
+### Self-Update
+
+The Desktop app can upgrade itself from the system tray menu:
+- **Tray → Check for Updates** — runs `brew upgrade --cask candelahq/tap/candela-desktop` and relaunches
+
 ## Provider Configuration
 
 Candela Desktop supports multiple LLM providers:
 
 - **OpenAI** — GPT-4o, GPT-4, GPT-3.5
 - **Google Gemini** — Gemini 2.5 Pro, Gemini 2.0 Flash
-- **Anthropic** — Claude Sonnet, Claude Haiku
+- **Anthropic** — Claude Sonnet, Claude Haiku (via Vertex AI)
 - **Ollama** — Local models (auto-discovered)
 - **LM Studio** — Local models via OpenAI-compatible API
 
@@ -63,6 +87,16 @@ The trace viewer displays a waterfall view of distributed traces:
 - **Cost** — Estimated cost based on provider pricing
 - **Attributes** — Full span attributes including model, provider, and custom metadata
 
+## Upgrade
+
+```bash
+# Upgrade Desktop
+brew upgrade --cask candela-desktop
+
+# Upgrade CLI
+brew upgrade candela
+```
+
 ## Development
 
 ```bash
@@ -74,5 +108,5 @@ flutter run -d macos  # or linux, windows
 
 ## Related
 
-- [candela](/components/candela/) — Local proxy that Desktop can connect to
+- [candela](/components/candela/) — CLI proxy that Desktop auto-starts and manages
 - [candela-server](/components/candela-server/) — Cloud backend for team features
