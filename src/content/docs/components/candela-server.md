@@ -24,7 +24,7 @@ The server supports three authentication strategies, tried in order:
 |---|---|---|
 | Firebase ID Token | Browser UI | Firebase JS SDK |
 | Google ID Token | Service accounts | `idtoken.NewTokenSource()` |
-| OAuth2 Access Token | candela-local (user ADC) | `gcloud auth application-default login` |
+| OAuth2 Access Token | candela (user ADC) | `gcloud auth application-default login` |
 
 ## Container Layout
 
@@ -70,6 +70,6 @@ cd terraform && terraform apply
 
 ## Related
 
-- [candela-local](/components/candela-local/) — Developer proxy that connects to this server in Team Mode
+- [candela](/components/candela/) — Developer proxy that connects to this server in Team Mode
 - [candela-sidecar](/components/candela-sidecar/) — Lightweight production proxy alternative
 - [Architecture](/architecture/storage/) — CQRS storage design

@@ -10,7 +10,7 @@ description: Production deployment topology for the Candela platform.
 Developer Machine   │  OpenCode / Zed     │
                     │  JetBrains / Cursor  │
                     │        │             │
-                    │  candela-local       │
+                    │  candela              │
                     │  (:8181 / :1234)     │
                     └────────┬────────────┘
                              │ Bearer token (OIDC via ADC)
@@ -38,7 +38,7 @@ Google Cloud        │  Cloud Run          │
 |---|---|---|
 | **Go Backend** | `cmd/candela-server` | API, LLM proxy, span ingestion, auth, storage |
 | **Next.js UI** | `ui/` | Dashboard, trace waterfall, costs, admin |
-| **candela-local** | `cmd/candela-local` | CLI proxy injecting Google credentials for dev tools |
+| **candela** | `cmd/candela` | CLI proxy injecting Google credentials for dev tools |
 | **candela-sidecar** | `cmd/candela-sidecar` | Lightweight container proxy with Pub/Sub export |
 | **Terraform** | `terraform/` | Cloud Run, BigQuery, Firestore, Firebase, IAM |
 

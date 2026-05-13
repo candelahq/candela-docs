@@ -7,10 +7,10 @@ import { Tabs, TabItem, Steps } from '@astrojs/starlight/components';
 
 <Steps>
 
-1. **Start candela-local**
+1. **Start candela**
 
    ```bash
-   candela-local
+   candela start
    ```
 
    This starts two listeners:
@@ -19,7 +19,7 @@ import { Tabs, TabItem, Steps } from '@astrojs/starlight/components';
 
 2. **Send a request through Candela**
 
-   Route LLM requests through candela-local instead of calling providers directly:
+   Route LLM requests through candela instead of calling providers directly:
 
    <Tabs>
      <TabItem label="curl">
@@ -38,7 +38,7 @@ import { Tabs, TabItem, Steps } from '@astrojs/starlight/components';
 
        client = OpenAI(
            base_url="http://localhost:1234/v1",
-           api_key="candela",  # placeholder — candela-local handles auth
+           api_key="candela",  # placeholder — candela handles auth
        )
 
        response = client.chat.completions.create(
@@ -95,7 +95,7 @@ import { Tabs, TabItem, Steps } from '@astrojs/starlight/components';
 ---
 
 :::tip[What's next?]
-- [Configure cloud models](/components/candela-local/) in Solo + Cloud mode
+- [Configure cloud models](/components/candela/) in Solo + Cloud mode
 - [Deploy to production](/components/candela-sidecar/) with candela-sidecar
 - [Integrate with Google ADK](/guides/adk-integration/) for distributed tracing
 - [Add tenant/job attribution](/guides/enrichment-sdks/) with the Enrichment SDKs

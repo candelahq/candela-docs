@@ -208,4 +208,4 @@ See [ADK Integration](/guides/adk-integration/) for full OTel trace correlation 
 | `ValueError: invalid tenant_id` | ID contains spaces or special chars | Use only `[a-zA-Z0-9._-]`, max 128 chars |
 | Tenant shows as empty in dashboard | SDK not installed / headers not injected | Verify with `curl -v` that `X-Candela-Tenant-Id` appears |
 | Baggage not propagating | Existing Baggage header clobbered | SDKs append, never overwrite — check for middleware that resets headers |
-| Cost attribution missing | Proxy not configured to parse enrichment | Ensure candela-local ≥ v0.2.0 or candela-sidecar ≥ v0.4.0 |
+| Cost attribution missing | Proxy not configured to parse enrichment | Ensure candela ≥ v0.2.0 or candela-sidecar ≥ v0.4.0 |

@@ -7,19 +7,19 @@ import { Tabs, TabItem, Steps } from '@astrojs/starlight/components';
 
 All Candela components live in the [candelahq/candela](https://github.com/candelahq/candela) monorepo.
 
-## candela-local (Recommended Start)
+## candela CLI (Recommended Start)
 
 The fastest way to get started — a developer proxy that manages local and cloud models with built-in observability.
 
 <Tabs>
   <TabItem label="Homebrew">
     ```bash
-    brew install candelahq/tap/candela-local
+    brew install candelahq/tap/candela
     ```
   </TabItem>
   <TabItem label="go install">
     ```bash
-    go install github.com/candelahq/candela/cmd/candela-local@latest
+    go install github.com/candelahq/candela/cmd/candela@latest
     ```
   </TabItem>
   <TabItem label="From Source">
@@ -27,14 +27,14 @@ The fastest way to get started — a developer proxy that manages local and clou
     git clone https://github.com/candelahq/candela.git
     cd candela
     nix develop   # or ensure Go 1.26+ is installed
-    go run ./cmd/candela-local
+    go run ./cmd/candela
     ```
   </TabItem>
 </Tabs>
 
 ### Configure
 
-Create `~/.candela.yaml`:
+Create `~/.config/candela/config.yaml`:
 
 ```yaml
 runtime_backend: ollama
@@ -43,7 +43,7 @@ lm_studio_port: 1234
 ```
 
 :::tip[Solo + Cloud]
-Add `providers` and `vertex_ai` to also route cloud models (Gemini, Claude) through candela-local. See [candela-local docs](/components/candela-local/).
+Add `providers` and `vertex_ai` to also route cloud models (Gemini, Claude) through candela. See [candela docs](/components/candela/).
 :::
 
 ---
@@ -95,7 +95,7 @@ Flutter desktop app for provider management and trace visualization.
 <Tabs>
   <TabItem label="Homebrew">
     ```bash
-    brew install --cask candelahq/tap/candela
+    brew install --cask candelahq/tap/candela-desktop
     ```
   </TabItem>
   <TabItem label="Download">
@@ -108,7 +108,7 @@ Flutter desktop app for provider management and trace visualization.
 ## Verify
 
 ```bash
-candela-local --help
+candela version
 ```
 
 :::note[You're ready!]
