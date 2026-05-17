@@ -1,0 +1,18 @@
+name: Sync Governance Preview
+
+on:
+  push:
+    branches: [docs/governance-rebrand]
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push to governance preview repo
+        run: |
+          git remote add governance https://x-access-token:${{ secrets.GOVERNANCE_DOCS_TOKEN }}@github.com/candelahq/candela-docs-governance.git
+          git push governance docs/governance-rebrand:main --force
