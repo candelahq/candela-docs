@@ -8,12 +8,13 @@ Candela's cost engine calculates the USD cost of every proxied LLM request based
 ## How It Works
 
 1. Proxy captures `input_tokens` and `output_tokens` from the LLM response
-2. Cost engine resolves pricing: **config override → built-in default → model-name fallback**
-3. Applies model-level discount, then global discount
-4. Final cost is recorded on the span and deducted from the user's budget
+2. **Cache normalization** — adjusts input tokens to account for prompt caching discounts (see below)
+3. Cost engine resolves pricing: **config override → built-in default → model-name fallback**
+4. Applies model-level discount, then global discount
+5. Final cost is recorded on the span and deducted from the user's budget
 
 ```
-cost = (input_tokens / 1M × input_per_million + output_tokens / 1M × output_per_million)
+cost = (normalized_input / 1M × input_per_million + output_tokens / 1M × output_per_million)
        × (1 - model_discount)
        × (1 - global_discount)
 ```
@@ -94,3 +95,70 @@ calc.SetPricing(costcalc.ModelPricing{
 
 calc.SetGlobalDiscount(0.20) // 20% off everything
 ```
+
+## Prompt Cache Normalization
+
+When LLMs use [prompt caching](https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching), providers charge less for cached tokens than fresh input. Candela automatically normalizes cached tokens to their **cost-equivalent** value before calculating the final price.
+
+### Cache Discount Rates
+
+| Provider | Cache Read | Cache Write | Source |
+|----------|-----------|-------------|--------|
+| **Anthropic** | 90% off (0.1×) | 25% surcharge (1.25×) | [Anthropic pricing](https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching#pricing) |
+| **Google Gemini 2.5+/3.x** | 90% off (0.1×) | No surcharge | [Vertex AI pricing](https://cloud.google.com/vertex-ai/generative-ai/pricing) |
+| **Google Gemini 2.0** | 75% off (0.25×) | No surcharge | Vertex AI pricing |
+| **OpenAI** | 50% off (0.5×) | No surcharge | [OpenAI pricing](https://openai.com/api/pricing/) |
+
+### How It Works
+
+Each provider reports cache tokens differently. Candela handles both modes automatically:
+
+- **Inclusive** (OpenAI, Google) — `input_tokens` includes cached tokens as a subset. Candela subtracts them and re-adds at the discounted rate.
+- **Additive** (Anthropic) — `input_tokens` is only fresh tokens. Cache tokens are separate fields. Candela adds their discounted equivalents on top.
+
+```
+# OpenAI/Google (inclusive): input_tokens = 1000 (includes 800 cached)
+normalized = (1000 - 800) + (800 × 0.5) = 200 + 400 = 600
+
+# Anthropic (additive): input_tokens = 200 (fresh only), cache_read = 800
+normalized = 200 + (800 × 0.1) = 200 + 80 = 280
+```
+
+:::note[Automatic — no config needed]
+Cache normalization happens transparently. The raw cache token counts are preserved in the span for observability, while the cost calculation uses the normalized value.
+:::
+
+### Custom Cache Discount Overrides
+
+Override cache rates per provider via the Go API (e.g., for negotiated enterprise pricing or new provider integrations):
+
+```go
+calc.SetCacheDiscount("anthropic", costcalc.CacheDiscountConfig{
+    ReadDiscount:       0.1,   // 90% off cache reads
+    CreateMultiplier:   1.25,  // 25% surcharge on cache writes
+    InputIncludesCache: false, // Anthropic uses additive mode
+})
+```
+
+## Tiered Pricing
+
+Some models have different rates based on input context length. Candela supports this automatically:
+
+| Model | Threshold | Below | Above |
+|-------|-----------|-------|-------|
+| **Gemini 2.5 Pro** | 200K tokens | $1.25 / $10.00 (in/out per M) | $2.50 / $15.00 |
+
+Tiered pricing is also configurable per-model:
+
+```yaml
+pricing:
+  models:
+    - provider: google
+      model: gemini-2.5-pro
+      input_per_million: 1.25
+      output_per_million: 10.00
+      input_per_million_high: 2.50
+      output_per_million_high: 15.00
+      tier_threshold_tokens: 200000
+```
+
