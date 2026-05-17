@@ -14,6 +14,7 @@ export default defineConfig({
 			favicon: '/favicon.png',
 			social: [
 				{ icon: 'github', label: 'GitHub', href: 'https://github.com/candelahq/candela' },
+				{ icon: 'globe', label: 'Website', href: 'https://www.candelahq.com' },
 			],
 			customCss: ['./src/styles/custom.css'],
 			head: [
