@@ -3,6 +3,8 @@ title: Tenant Isolation & Attribution
 description: Per-tenant governance — cost attribution, spend isolation, and tenant-scoped policy enforcement.
 ---
 
+import { Aside } from '@astrojs/starlight/components';
+
 Candela supports **first-class multitenant governance**: every LLM API call is attributed to a downstream customer (tenant), enabling per-tenant cost tracking, spend isolation, and tenant-scoped policy enforcement. Tenant identity flows through the entire governance pipeline — budget gates, audit trails, and policy decisions are all tenant-aware.
 
 ## How It Works
@@ -149,9 +151,9 @@ When the OTLP sink is enabled, `tenant_id` and `job_id` are exported as span att
 
 ## Security Considerations
 
-:::important
+<Aside type="caution" title="Attribution, Not Access Control">
 `tenant_id` is an **attribution label**, not an access control boundary. It's set by the calling application, not by Candela's auth system. Enforce tenant authorization in your application layer.
-:::
+</Aside>
 
 - The `GetTenantLeaderboard` API is admin-only
 - Tenant IDs are validated against `[a-zA-Z0-9\-._]{1,128}` to prevent injection attacks

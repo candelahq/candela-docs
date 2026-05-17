@@ -3,7 +3,8 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 
 export default defineConfig({
-	site: 'https://www.candelahq.com',
+	site: 'https://candelahq.github.io',
+	base: '/candela-docs-governance',
 	integrations: [
 		starlight({
 			title: 'Candela',
