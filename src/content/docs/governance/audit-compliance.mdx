@@ -84,7 +84,7 @@ Audit data is written to your configured storage backend. Candela supports three
     ```
 
     - Immutable by default (no `UPDATE`/`DELETE` on spans table)
-    - Partitioned by `created_at` for cost-efficient queries
+    - Partitioned by `timestamp` for cost-efficient queries
     - Supports federated queries with existing data warehouse
   </TabItem>
   <TabItem label="DuckDB (Edge)">
@@ -156,10 +156,10 @@ For advanced analytics, query BigQuery directly:
 SELECT
   user_id,
   COUNT(*) AS requests,
-  SUM(total_tokens) AS tokens,
+  SUM(input_tokens + output_tokens) AS tokens,
   SUM(cost_usd) AS spend_usd
 FROM `my-project.candela.spans`
-WHERE created_at >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 30 DAY)
+WHERE timestamp >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 30 DAY)
 GROUP BY user_id
 ORDER BY spend_usd DESC
 LIMIT 10;
