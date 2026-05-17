@@ -4,7 +4,7 @@ import starlight from '@astrojs/starlight';
 
 export default defineConfig({
 	site: 'https://candelahq.github.io',
-	base: '/candela-docs-governance',
+	base: '/candela-docs',
 	integrations: [
 		starlight({
 			title: 'Candela',
@@ -67,6 +67,7 @@ export default defineConfig({
 						{ label: 'Model Access Control', slug: 'governance/model-access' },
 						{ label: 'Audit & Compliance', slug: 'governance/audit-compliance' },
 						{ label: 'Tenant Isolation', slug: 'governance/multitenancy' },
+						{ label: 'eBPF Enforcement', slug: 'governance/ebpf-enforcement', badge: { text: 'Soon', variant: 'caution' } },
 					],
 				},
 				{
