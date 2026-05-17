@@ -1,0 +1,182 @@
+---
+title: Audit & Compliance
+description: Immutable audit trails, compliance scoring, and exportable reports.
+---
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+
+Candela produces a complete, immutable audit trail of every LLM interaction and every administrative action. This trail is the foundation for compliance reporting, incident investigation, and governance visibility.
+
+## What Gets Audited
+
+### LLM Request Traces
+
+Every request proxied through Candela generates a trace span with:
+
+| Field | Description |
+|-------|-------------|
+| `trace_id` | Unique trace identifier (W3C Trace Context) |
+| `span_id` | Individual span within the trace |
+| `timestamp` | Request timestamp (UTC) |
+| `provider` | LLM provider (openai, google, anthropic) |
+| `model` | Requested model name |
+| `user_id` | Authenticated user or API key identifier |
+| `tenant_id` | Tenant attribution (from `X-Candela-Tenant-Id` or W3C Baggage) |
+| `job_id` | Job or pipeline identifier (from `X-Candela-Job-Id`) |
+| `input_tokens` | Prompt token count |
+| `output_tokens` | Completion token count |
+| `cache_read_tokens` | Tokens served from prompt cache |
+| `cache_creation_tokens` | Tokens written to prompt cache |
+| `cost_usd` | Calculated cost in USD |
+| `latency_ms` | End-to-end request latency |
+| `ttfb_ms` | Time to first byte (streaming) |
+| `status_code` | Upstream HTTP status |
+| `budget_remaining_usd` | User's remaining budget after deduction |
+
+### Administrative Actions
+
+Every admin operation is logged to an immutable audit collection that **survives user deletion**:
+
+| Action | What's Recorded |
+|--------|----------------|
+| `create_user` | New user provisioned with role and budget |
+| `set_budget` | Budget limit changed (old → new) |
+| `reset_spend` | User's daily spend reset to $0 |
+| `create_grant` | One-time budget grant created |
+| `revoke_grant` | Grant revoked before expiration |
+| `deactivate_user` | User access suspended |
+| `reactivate_user` | User access restored |
+| `delete_user` | User removed (audit entries preserved) |
+
+### Policy Decisions
+
+Governance enforcement actions are also logged:
+
+| Event | When |
+|-------|------|
+| `budget_exceeded` | Request blocked — user budget exhausted |
+| `rate_limited` | Request throttled — rate limit reached |
+| `budget_alert` | Threshold crossed (80%, 90%, 100%) |
+
+<Aside type="note" title="Coming Soon">
+  These additional policy events will be logged as governance features ship:
+  - `model_denied` — Request blocked by model allowlist/blocklist ([#207](https://github.com/candelahq/candela/issues/207))
+  - `phi_detected` — PHI found in prompt (block/redact/warn/log modes) ([#159](https://github.com/candelahq/candela/issues/159))
+  - `policy_violation` — Per-tenant policy rule violated ([#208](https://github.com/candelahq/candela/issues/208))
+</Aside>
+
+---
+
+## Storage Backends
+
+Audit data is written to your configured storage backend. Candela supports three backends with identical audit semantics:
+
+<Tabs>
+  <TabItem label="BigQuery (Production)">
+    Serverless, petabyte-scale storage for production deployments.
+
+    ```yaml
+    storage:
+      type: bigquery
+      bigquery:
+        project_id: my-project
+        dataset: candela
+    ```
+
+    - Immutable by default (no `UPDATE`/`DELETE` on spans table)
+    - Partitioned by `created_at` for cost-efficient queries
+    - Supports federated queries with existing data warehouse
+  </TabItem>
+  <TabItem label="DuckDB (Edge)">
+    High-performance embedded database for edge and single-node deployments.
+
+    ```yaml
+    storage:
+      type: duckdb
+      duckdb:
+        path: /data/candela.duckdb
+    ```
+
+    - Single-file, zero-dependency
+    - Excellent analytical query performance
+    - CQRS fan-out to DuckDB + other sinks simultaneously
+  </TabItem>
+  <TabItem label="SQLite (Dev)">
+    Lightweight storage for development and local testing.
+
+    ```yaml
+    storage:
+      type: sqlite
+      sqlite:
+        path: ~/.candela/traces.db
+    ```
+  </TabItem>
+</Tabs>
+
+---
+
+## Querying the Audit Trail
+
+### Admin API
+
+Use the ConnectRPC `UserService` to query administrative audit logs:
+
+```bash
+buf curl --protocol connect \
+  https://candela.example.com/candela.v1.UserService/ListAuditLog \
+  -d '{"user_id": "alice@example.com", "limit": 20}'
+```
+
+### Trace Search
+
+Use the `TraceService` to search LLM request traces with filters:
+
+```bash
+buf curl --protocol connect \
+  https://candela.example.com/candela.v1.TraceService/SearchSpans \
+  -d '{
+    "project_id": "default",
+    "filters": {
+      "model": "gpt-4o",
+      "tenant_id": "acme-corp"
+    },
+    "time_range": {
+      "start": "2026-05-01T00:00:00Z",
+      "end": "2026-05-17T00:00:00Z"
+    }
+  }'
+```
+
+### BigQuery Direct
+
+For advanced analytics, query BigQuery directly:
+
+```sql
+-- Top 10 users by spend this month
+SELECT
+  user_id,
+  COUNT(*) AS requests,
+  SUM(total_tokens) AS tokens,
+  SUM(cost_usd) AS spend_usd
+FROM `my-project.candela.spans`
+WHERE created_at >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 30 DAY)
+GROUP BY user_id
+ORDER BY spend_usd DESC
+LIMIT 10;
+```
+
+---
+
+## Compliance Roadmap
+
+<Aside type="note" title="Coming Soon">
+  These compliance features are tracked on the [Enterprise Governance & Compliance](https://github.com/orgs/candelahq/projects/4) project board.
+</Aside>
+
+| Feature | Issue | Status |
+|---------|-------|--------|
+| Compliance score (% requests passing all policies) | [#210](https://github.com/candelahq/candela/issues/210) | Planned |
+| Customer-facing governance dashboard | [#209](https://github.com/candelahq/candela/issues/209) | Planned |
+| CSV cost reports & trace export | [#107](https://github.com/candelahq/candela/issues/107) | Planned |
+| Compliance summary PDF | [#107](https://github.com/candelahq/candela/issues/107) | Planned |
+| Anomaly detection (cost/latency deviation) | [#211](https://github.com/candelahq/candela/issues/211) | Planned |

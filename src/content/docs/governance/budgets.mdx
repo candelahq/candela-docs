@@ -1,0 +1,246 @@
+---
+title: Budget Enforcement
+description: Cost governance at the proxy layer — per-user spending limits, grants, alerts, and rate limiting.
+---
+
+import { Tabs, TabItem, Steps } from '@astrojs/starlight/components';
+
+Budget enforcement is Candela's most mature governance capability. Every LLM request passes through a real-time budget gate that checks, deducts, and alerts — ensuring no user or automation exceeds their approved spending limits. This is not a dashboard metric; it's an active enforcement control that blocks requests at the proxy layer.
+
+## How It Works
+
+Every LLM request passes through a two-phase budget check:
+
+```
+Request arrives
+      │
+      ▼
+┌─────────────┐     Budget exhausted?
+│ Pre-flight  │────────────────────────▶ HTTP 402
+│ Budget Gate │                          "budget exhausted"
+└──────┬──────┘
+       │ ✅ Allowed
+       ▼
+┌─────────────┐
+│  LLM Call   │     tokens counted,
+│  (proxied)  │     cost calculated
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐     Threshold crossed?
+│  Deduct &   │────────────────────────▶ 🔔 Alert
+│  Notify     │     (80%, 90%, 100%)
+└─────────────┘
+```
+
+**Key design decisions:**
+- Pre-flight check is **soft** — it checks if _any_ budget remains but doesn't estimate cost (impossible before the call)
+- Deduction is **synchronous** — prevents billing bypass on crash
+- Grants are spent **first** (waterfall: earliest-expiring grant → daily budget)
+- Service accounts **skip** budget checks — they have no budget entries
+
+---
+
+## Setting Up Budgets
+
+### Server Configuration
+
+Set a default daily budget for all new users in your server config:
+
+```yaml
+# config.yaml (candela-server)
+users:
+  default_daily_budget_usd: 5.00  # applied to auto-provisioned users
+```
+
+### Admin API
+
+Admins can manage budgets via the ConnectRPC `UserService`:
+
+<Tabs>
+  <TabItem label="Set Budget">
+    ```bash
+    # Set a $10/day budget for a user
+    buf curl --protocol connect \
+      https://candela.example.com/candela.v1.UserService/SetBudget \
+      -d '{
+        "user_id": "alice@example.com",
+        "limit_usd": 10.0
+      }'
+    ```
+  </TabItem>
+  <TabItem label="Check Budget">
+    ```bash
+    # View current budget status
+    buf curl --protocol connect \
+      https://candela.example.com/candela.v1.UserService/GetBudget \
+      -d '{"user_id": "alice@example.com"}'
+    ```
+
+    Response:
+    ```json
+    {
+      "budget": {
+        "userId": "alice@example.com",
+        "limitUsd": 10.0,
+        "spentUsd": 3.47,
+        "tokensUsed": 14200,
+        "periodType": "BUDGET_PERIOD_DAILY",
+        "periodKey": "2026-05-04"
+      }
+    }
+    ```
+  </TabItem>
+  <TabItem label="Reset Spend">
+    ```bash
+    # Emergency: reset a user's daily spend to $0
+    buf curl --protocol connect \
+      https://candela.example.com/candela.v1.UserService/ResetSpend \
+      -d '{"user_id": "alice@example.com"}'
+    ```
+  </TabItem>
+</Tabs>
+
+### Self-Service API
+
+Developers can check their own budget:
+
+```bash
+# Authenticated as the current user
+buf curl --protocol connect \
+  https://candela.example.com/candela.v1.UserService/GetMyBudget
+```
+
+Returns remaining budget across grants + daily allocation.
+
+---
+
+## Grants
+
+Grants are one-time budget bonuses with expiration dates. They're consumed **before** the daily budget (waterfall order: earliest-expiring grant first).
+
+<Tabs>
+  <TabItem label="Create Grant">
+    ```bash
+    buf curl --protocol connect \
+      https://candela.example.com/candela.v1.UserService/CreateGrant \
+      -d '{
+        "user_id": "alice@example.com",
+        "amount_usd": 50.0,
+        "reason": "hackathon sprint",
+        "starts_at": "2026-05-04T00:00:00Z",
+        "expires_at": "2026-05-11T00:00:00Z"
+      }'
+    ```
+  </TabItem>
+  <TabItem label="List Grants">
+    ```bash
+    buf curl --protocol connect \
+      https://candela.example.com/candela.v1.UserService/ListGrants \
+      -d '{"user_id": "alice@example.com", "active_only": true}'
+    ```
+  </TabItem>
+  <TabItem label="Revoke Grant">
+    ```bash
+    buf curl --protocol connect \
+      https://candela.example.com/candela.v1.UserService/RevokeGrant \
+      -d '{
+        "user_id": "alice@example.com",
+        "grant_id": "abc123-..."
+      }'
+    ```
+  </TabItem>
+</Tabs>
+
+### Deduction Waterfall
+
+When a $0.50 LLM call completes:
+
+1. Check active grants (sorted by `expires_at` ascending)
+2. Deduct from earliest-expiring grant until spent or grant exhausted
+3. Remaining cost → daily budget
+4. All updates are **transactional**
+
+```
+Cost: $0.50
+  ├── Grant A ($0.30 remaining, expires May 5) → deduct $0.30
+  ├── Grant B ($2.00 remaining, expires May 10) → deduct $0.20
+  └── Daily budget → $0.00 (grants covered it)
+```
+
+---
+
+## Budget Alerts
+
+Alerts fire when a user's daily spend crosses configurable thresholds. Defaults:
+
+| Threshold | When |
+|-----------|------|
+| **80%** | Warning — approaching limit |
+| **90%** | Critical — nearly exhausted |
+| **100%** | Blocked — budget fully spent |
+
+### Notification Channels
+
+| Channel | Status | How |
+|---------|--------|-----|
+| **Structured logs** | ✅ Built-in | Cloud Logging → alert policy |
+| **Slack** | 🔜 Planned | Webhook integration |
+| **Microsoft Teams** | 🔜 Planned | Webhook integration |
+
+Alerts are **deduplicated** — each threshold fires at most once per period per user.
+
+### Cloud Logging Alert Policy
+
+The log-based notifier emits structured warnings that can trigger GCP alert policies:
+
+```
+jsonPayload.message = "🔔 budget alert: 90% threshold reached"
+```
+
+---
+
+## Rate Limiting
+
+Per-user rate limiting prevents runaway automation from draining budgets:
+
+| Setting | Default | Scope |
+|---------|---------|-------|
+| `rate_limit` | 60 req/min | Per user |
+
+Rate limits use minute-window counters with a 2-minute TTL.
+
+### Configuring Per-User Limits
+
+```bash
+buf curl --protocol connect \
+  https://candela.example.com/candela.v1.UserService/UpdateUser \
+  -d '{
+    "id": "alice@example.com",
+    "rate_limit": 120
+  }'
+```
+
+---
+
+## Audit Trail
+
+Every admin action is logged to an immutable audit collection:
+
+| Action | Logged |
+|--------|--------|
+| `create_user` | ✅ |
+| `set_budget` | ✅ |
+| `reset_spend` | ✅ |
+| `create_grant` | ✅ |
+| `revoke_grant` | ✅ |
+| `deactivate_user` | ✅ |
+| `reactivate_user` | ✅ |
+| `delete_user` | ✅ (global collection — survives deletion) |
+
+```bash
+buf curl --protocol connect \
+  https://candela.example.com/candela.v1.UserService/ListAuditLog \
+  -d '{"user_id": "alice@example.com", "limit": 20}'
+```
+

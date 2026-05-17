@@ -1,0 +1,125 @@
+---
+title: Governance Overview
+description: How Candela enforces policies on your LLM traffic — what ships today and what's on the roadmap.
+---
+
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+Candela is a **governance-first proxy** — it sits between your applications and LLM providers, enforcing policies in real time while capturing a complete audit trail. Governance isn't a roadmap feature; it's the core architecture.
+
+## What Ships Today
+
+Every Candela deployment — whether `candela` on a developer laptop or `candela-server` in production — includes these enforcement controls out of the box:
+
+<CardGrid>
+  <Card title="Budget Enforcement" icon="warning">
+    Per-user daily budgets with pre-flight gates. Requests that would exceed a user's budget are rejected with `HTTP 402` before they ever reach the LLM provider. Grants provide one-time budget bonuses with expiration dates and waterfall deduction.
+  </Card>
+  <Card title="Rate Limiting" icon="setting">
+    Per-user request throttling with minute-window counters. Prevents runaway automation and rogue scripts from consuming resources. Configurable limits per user via the admin API.
+  </Card>
+  <Card title="Immutable Audit Trail" icon="document">
+    Every LLM request, every admin action, every policy decision — logged to BigQuery, DuckDB, or SQLite. Audit entries survive user deletion. The trail is append-only and tamper-proof by design.
+  </Card>
+  <Card title="Tenant Isolation" icon="random">
+    Full multi-tenant attribution via `X-Candela-Tenant-Id` headers and W3C Baggage. Per-tenant cost tracking, spend leaderboards, and tenant-scoped dashboard views — ensuring complete separation of concerns.
+  </Card>
+  <Card title="Role-Based Access Control" icon="approve-check-circle">
+    Admin vs Developer roles with distinct permissions. Admins manage budgets, grants, and user lifecycle. Developers can only view their own usage and budget status.
+  </Card>
+  <Card title="Multi-Provider Routing" icon="puzzle">
+    Route to OpenAI, Gemini, Anthropic, Ollama, and LM Studio through a single endpoint. All traffic — regardless of provider — passes through the same governance pipeline.
+  </Card>
+</CardGrid>
+
+---
+
+## How Governance Works
+
+Every LLM request passes through a governance pipeline before it reaches the upstream provider:
+
+```
+Request arrives
+      │
+      ▼
+┌─────────────┐
+│ Rate Limit  │──── Over limit? ──────────────▶ HTTP 429
+└──────┬──────┘
+       │ ✅
+       ▼
+┌─────────────┐
+│  Body Read  │     Extract model, tokens,
+│  + Parse    │     tenant, user metadata
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│  PHI Scan   │──── PHI detected? ────────────▶ Block / Redact / Warn
+│  (roadmap)  │                                  (configurable mode)
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│ Model Policy│──── Unapproved model? ────────▶ HTTP 403
+│  (roadmap)  │
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│   Budget    │──── Budget exhausted? ────────▶ HTTP 402
+│    Gate     │
+└──────┬──────┘
+       │ ✅ All checks passed
+       ▼
+┌─────────────┐
+│  Forward to │     Proxy to upstream,
+│   Provider  │     capture response
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│  Deduct &   │     Calculate cost,
+│   Audit     │     deduct from budget,
+│             │     write audit span
+└─────────────┘
+```
+
+The pipeline is **fail-open for observability** (a tracing failure never blocks requests) but **fail-closed for governance** (a budget gate failure always blocks).
+
+---
+
+## What's on the Roadmap
+
+These governance capabilities are designed and tracked on the [Enterprise Governance & Compliance](https://github.com/orgs/candelahq/projects/4) project board:
+
+<CardGrid>
+  <LinkCard
+    title="Model Access Control"
+    description="Global and per-tenant model allowlists/blocklists. Reject unapproved models at the proxy layer."
+    href="/governance/model-access/"
+  />
+  <LinkCard
+    title="PHI/PII Scanning"
+    description="Pre-flight scanning for protected health information. Block, redact, warn, or log — configurable per tenant."
+    href="https://github.com/candelahq/candela/issues/159"
+  />
+  <LinkCard
+    title="Compliance Dashboard"
+    description="Customer-facing, read-only governance view. Compliance scoring, policy status, and exportable reports."
+    href="https://github.com/candelahq/candela/issues/209"
+  />
+  <LinkCard
+    title="Per-Tenant Policies"
+    description="Tenant-scoped policy configuration — different model restrictions, budget tiers, and data rules per customer."
+    href="https://github.com/candelahq/candela/issues/208"
+  />
+</CardGrid>
+
+---
+
+## Governance Pages
+
+<LinkCard title="Budget Enforcement" description="Per-user spending limits, grants, alerts, and rate limiting." href="/governance/budgets/" />
+<LinkCard title="Model Access Control" description="Restrict which LLM models your users and tenants can access." href="/governance/model-access/" />
+<LinkCard title="Audit & Compliance" description="Immutable audit trails, compliance scoring, and exportable reports." href="/governance/audit-compliance/" />
+<LinkCard title="Multitenancy" description="Tenant isolation, attribution, and per-tenant governance controls." href="/governance/multitenancy/" />

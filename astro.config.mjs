@@ -58,6 +58,16 @@ export default defineConfig({
 					],
 				},
 				{
+					label: 'Governance',
+					items: [
+						{ label: 'Overview', slug: 'governance/overview' },
+						{ label: 'Budget Enforcement', slug: 'governance/budgets' },
+						{ label: 'Model Access Control', slug: 'governance/model-access' },
+						{ label: 'Audit & Compliance', slug: 'governance/audit-compliance' },
+						{ label: 'Tenant Isolation', slug: 'governance/multitenancy' },
+					],
+				},
+				{
 					label: 'Guides',
 					items: [
 						{ label: 'ADK Integration', slug: 'guides/adk-integration' },
