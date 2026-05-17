@@ -20,6 +20,8 @@ jobs:
 
       - run: npm ci
       - run: npm run build
+        env:
+          SITE_BASE: /
 
       - name: Create Cloudflare Pages project (if needed)
         continue-on-error: true
