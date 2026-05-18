@@ -42,8 +42,23 @@ port: 8181
 lm_studio_port: 1234
 ```
 
+### Authenticate
+
+To use cloud models (Gemini, Claude via Vertex AI) or connect to a shared Candela server, authenticate once:
+
+```bash
+candela auth login     # opens browser — Google OAuth flow
+candela auth status    # verify credentials
+```
+
+Credentials are stored at `~/.config/candela/adc.json` (ADC-compatible). No `gcloud` CLI required.
+
+:::tip[gcloud also works]
+If you already have `gcloud auth application-default login` set up, candela will use those credentials automatically as a fallback.
+:::
+
 :::tip[Solo + Cloud]
-Add `providers` and `vertex_ai` to also route cloud models (Gemini, Claude) through candela. See [candela docs](/components/candela/).
+Add `providers` and `vertex_ai` to route cloud models (Gemini, Claude) through candela. See [candela docs](/components/candela/).
 :::
 
 ---
