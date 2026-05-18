@@ -1,0 +1,138 @@
+---
+title: Model Access Control
+description: Restrict which LLM models your users and tenants can access.
+---
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+
+<Aside type="note" title="Coming Soon">
+  Model access control is tracked as [#207](https://github.com/candelahq/candela/issues/207) on the [Enterprise Governance & Compliance](https://github.com/orgs/candelahq/projects/4) project board. The design below reflects the planned implementation.
+</Aside>
+
+Model access control lets you define which LLM models are approved for use within your organization. Requests for unapproved models are rejected at the proxy layer with a `403 Forbidden` response and a full audit trail entry.
+
+## Why Model Access Control?
+
+Not all models are appropriate for every workload:
+
+- **Compliance**: Some models aren't approved for handling sensitive data
+- **Cost**: GPT-4o costs 10-30× more than GPT-4o-mini for similar tasks
+- **Consistency**: Standardize on approved models to reduce operational complexity
+- **Vendor risk**: Limit exposure to specific providers
+
+## How It Works
+
+The model access policy is evaluated as a pre-flight check in the [governance pipeline](/governance/overview/), after the request body is parsed but before the budget gate:
+
+```
+Request: POST /proxy/openai/v1/chat/completions
+Body:    { "model": "gpt-4o", ... }
+         │
+         ▼
+┌─────────────────┐
+│  Model Policy   │──── "gpt-4o" in allowlist? ──▶ ✅ Continue
+│  Evaluation     │──── "gpt-4o" in blocklist? ──▶ ❌ HTTP 403
+└─────────────────┘
+```
+
+## Configuration
+
+### Global Allowlist
+
+Define a global model allowlist that applies to all tenants:
+
+<Tabs>
+  <TabItem label="Allowlist (recommended)">
+    Only these models are permitted. Everything else is blocked.
+
+    ```yaml
+    # config.yaml
+    governance:
+      models:
+        mode: allowlist
+        allowed:
+          - gpt-4o-mini
+          - gpt-4o
+          - gemini-2.5-pro
+          - gemini-2.5-flash
+          - claude-sonnet-4-20250514
+    ```
+  </TabItem>
+  <TabItem label="Blocklist">
+    All models are permitted except these. Use when you want to block specific high-cost or unapproved models.
+
+    ```yaml
+    # config.yaml
+    governance:
+      models:
+        mode: blocklist
+        blocked:
+          - o1-pro
+          - claude-opus-4-20250514
+    ```
+  </TabItem>
+</Tabs>
+
+### Per-Tenant Overrides
+
+Tenants can have their own model policies that override the global policy:
+
+```yaml
+# config.yaml
+governance:
+  models:
+    mode: allowlist
+    allowed:
+      - gpt-4o-mini
+      - gemini-2.5-flash
+
+  tenants:
+    research-team:
+      models:
+        # Research team gets access to expensive models
+        allowed:
+          - gpt-4o
+          - claude-sonnet-4-20250514
+          - gemini-2.5-pro
+    contractor-pool:
+      models:
+        # Contractors restricted to cost-efficient models only
+        allowed:
+          - gpt-4o-mini
+          - gemini-2.5-flash
+```
+
+## Enforcement Behavior
+
+When a request is blocked:
+
+- **HTTP Status**: `403 Forbidden`
+- **Response Body**: JSON with the denied model name and policy reason
+- **Audit Log**: Full entry with request metadata, user, tenant, and denied model
+- **Metrics**: `candela_policy_model_denied_total` counter incremented
+
+```json
+{
+  "error": "model_not_allowed",
+  "message": "Model 'o1-pro' is not in the approved model list for tenant 'contractor-pool'",
+  "model": "o1-pro",
+  "tenant_id": "contractor-pool",
+  "policy": "allowlist"
+}
+```
+
+## Audit Trail
+
+Every model policy decision — both allowed and denied — is recorded:
+
+| Field | Example |
+|-------|---------|
+| `action` | `model_policy_check` |
+| `result` | `denied` or `allowed` |
+| `model` | `o1-pro` |
+| `tenant_id` | `contractor-pool` |
+| `user_id` | `alice@example.com` |
+| `policy_mode` | `allowlist` |
+| `timestamp` | `2026-05-17T00:00:00Z` |
+
+This gives compliance teams a complete record of which models were used and which were blocked, by whom, and when.

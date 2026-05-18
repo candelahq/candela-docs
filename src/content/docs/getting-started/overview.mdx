@@ -5,36 +5,34 @@ description: Get up and running with Candela in minutes.
 
 import { Card, CardGrid, Tabs, TabItem, LinkCard } from '@astrojs/starlight/components';
 
-Welcome to Candela! This guide will help you get up and running with LLM observability in minutes.
+Welcome to Candela — an open-source **governance platform** that gives you full control and visibility over your LLM traffic. Enforce budgets, control model access, trace every request, and prove compliance.
 
 ## What is Candela?
 
-Candela is an open-source observability platform that gives you full visibility into your LLM traffic. It consists of four components:
+Candela sits between your applications and LLM providers as a transparent governance proxy. Every request is traced, costed, and policy-checked before it reaches the provider — and every response is logged to an immutable audit trail.
+
+It consists of four components:
 
 <CardGrid>
   <LinkCard
     title="candela"
-    description="Developer proxy + runtime manager — run local & cloud models with observability from your machine."
+    description="Developer proxy + runtime manager — run local & cloud models with governance and observability from your machine."
     href="/components/candela/"
-    icon="laptop"
   />
   <LinkCard
     title="candela-server"
-    description="Full backend — API server, LLM proxy, dashboard UI, deployed on Cloud Run."
+    description="Full backend — API server, LLM proxy, dashboard UI, budget enforcement, and team RBAC. Deployed on Cloud Run."
     href="/components/candela-server/"
-    icon="cloud"
   />
   <LinkCard
     title="candela-sidecar"
-    description="Lightweight production proxy (< 5MB) for containers — traces, cost, optional budget enforcement."
+    description="Lightweight production proxy (< 5MB) for containers — traces, cost, budget enforcement, and OTLP export."
     href="/components/candela-sidecar/"
-    icon="rocket"
   />
   <LinkCard
     title="candela-desktop"
-    description="Flutter desktop app — manage providers and view traces."
+    description="Desktop app — manage providers, monitor costs, and view traces."
     href="/components/candela-desktop/"
-    icon="setting"
   />
 </CardGrid>
 
@@ -42,7 +40,7 @@ Candela is an open-source observability platform that gives you full visibility 
 
 <Tabs>
   <TabItem label="Solo Developer">
-    Use **candela** for instant LLM observability on your machine — local models via Ollama, cloud models via ADC, all traced to SQLite.
+    Use **candela** for instant LLM governance on your machine — local models via Ollama, cloud models via ADC, all traced to SQLite with budget enforcement.
 
     ```bash
     go install github.com/candelahq/candela/cmd/candela@latest
@@ -51,17 +49,22 @@ Candela is an open-source observability platform that gives you full visibility 
     [candela docs →](/components/candela/)
   </TabItem>
   <TabItem label="Team / Production">
-    Deploy **candela-server** on Cloud Run with BigQuery storage, Firebase auth, and a dashboard UI. Developers connect via candela in Team Mode.
+    Deploy **candela-server** on Cloud Run with BigQuery storage, Firebase auth, budget enforcement, and a dashboard UI. Developers connect via candela in Team Mode.
 
     [candela-server docs →](/components/candela-server/)
   </TabItem>
   <TabItem label="Container Sidecar">
-    Drop **candela-sidecar** next to your application containers for zero-touch LLM tracing in production.
+    Drop **candela-sidecar** next to your application containers for zero-touch LLM governance in production.
 
     [candela-sidecar docs →](/components/candela-sidecar/)
   </TabItem>
+  <TabItem label="Enterprise / Compliance">
+    Candela provides the governance controls enterprise teams need: per-tenant budget enforcement, immutable audit trails, model access policies, and multi-provider routing — all behind a single proxy endpoint.
+
+    [Governance overview →](/governance/overview/)
+  </TabItem>
   <TabItem label="Google ADK">
-    Integrate Candela with your ADK agents for end-to-end distributed tracing with W3C Trace Context propagation.
+    Integrate Candela with your ADK agents for end-to-end distributed tracing with W3C Trace Context propagation and per-agent cost attribution.
 
     [ADK Integration →](/guides/adk-integration/)
   </TabItem>
@@ -70,5 +73,6 @@ Candela is an open-source observability platform that gives you full visibility 
 ## Next Steps
 
 <LinkCard title="Installation" description="Install any Candela component from the monorepo." href="/getting-started/installation/" />
-<LinkCard title="Quick Start" description="Send your first traced LLM request in under 5 minutes." href="/getting-started/quickstart/" />
+<LinkCard title="Quick Start" description="Send your first governed LLM request in under 5 minutes." href="/getting-started/quickstart/" />
+<LinkCard title="Governance Overview" description="Understand Candela's governance model — what ships today and what's on the roadmap." href="/governance/overview/" />
 <LinkCard title="Enrichment SDKs" description="Add tenant and job attribution with lightweight SDKs for Python, TypeScript, Go, Kotlin, and Rust." href="/guides/enrichment-sdks/" />

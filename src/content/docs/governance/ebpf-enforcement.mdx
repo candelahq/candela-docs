@@ -1,0 +1,158 @@
+---
+title: eBPF Enforcement
+description: Kernel-level enforcement ensuring all LLM traffic flows through the Candela proxy.
+---
+
+import { Badge, Aside } from '@astrojs/starlight/components';
+
+<Badge text="Coming Soon" variant="caution" size="large" />
+
+Candela will add **kernel-level enforcement** to guarantee that all LLM API traffic flows through the proxy — making observability, budget controls, and policy enforcement impossible to bypass, even by misconfigured or malicious workloads.
+
+## Why Enforcement?
+
+Without enforcement, applications can bypass the proxy by connecting directly to LLM provider APIs. This creates blind spots:
+
+- **Cost leaks** — untracked spending outside budget controls
+- **Policy violations** — unauthorized model access, no audit trail
+- **Data exfiltration** — sensitive prompts sent without PHI scanning
+
+eBPF enforcement closes these gaps at the kernel and network level.
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Pod                                                        │
+│                                                             │
+│  ┌─────────────┐        iptables redirect        ┌───────┐ │
+│  │ Application │ ──── port 443 ─────────────────→ │Candela│ │
+│  │ (any SDK)   │                                  │Sidecar│ │
+│  └─────────────┘                                  │:15001 │ │
+│                                                   └───┬───┘ │
+└───────────────────────────────────────────────────────┼─────┘
+                                                        │
+        ┌───────────────────────────────────────────────┘
+        ▼
+   Upstream LLM APIs (OpenAI, Anthropic, Gemini)
+```
+
+Applications connect to LLM APIs as usual. An `iptables` init container transparently redirects outbound TLS traffic to the Candela sidecar, which performs SNI-based routing, policy enforcement, and observability before forwarding to the real upstream.
+
+## Enforcement Layers
+
+Candela uses a **"belt and suspenders"** approach — multiple independent enforcement mechanisms that work together:
+
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| **Network** | Cilium `FQDNNetworkPolicy` | Block direct egress to LLM provider hostnames for non-proxy pods |
+| **Kernel** | Tetragon `TracingPolicy` (eBPF kprobes) | Detect or kill unauthorized binaries connecting to port 443 |
+| **Redirect** | `iptables` init container | Transparently redirect outbound TLS to the sidecar listener |
+| **TLS** | Ephemeral CA + SNI-based routing | MITM for transparent interception without SDK changes |
+
+<Aside type="tip">
+Each layer is independently useful. You can start with just `iptables` redirect (transparent proxy), add Cilium network policy for defense-in-depth, and layer on Tetragon for process-level enforcement.
+</Aside>
+
+## Single Source of Truth
+
+All enforcement resources are generated from a single `candela-policy.yaml` — the same file the sidecar reads for provider routing. Providers are defined **once**; Helm templates derive everything else automatically.
+
+```yaml
+# candela-policy.yaml
+providers:
+  - name: openai
+    upstream: https://api.openai.com
+    intercept: true
+
+  - name: anthropic
+    upstream: https://us-central1-aiplatform.googleapis.com
+    intercept: true
+    host_pattern: "*.aiplatform.googleapis.com"
+
+  - name: anthropic-direct
+    upstream: https://api.anthropic.com
+    intercept: true
+
+  - name: google
+    upstream: https://generativelanguage.googleapis.com
+    intercept: true
+
+enforcement:
+  enabled: true
+  mode: transparent              # transparent | explicit
+
+  transparent:
+    port: 15001                  # listener port for redirected traffic
+    proxy_uid: 1337              # UID for iptables exemption
+    passthrough_cidrs:
+      - 10.0.0.0/8
+      - 172.16.0.0/12
+
+  tetragon:
+    enabled: true
+    mode: audit                  # audit (log) | enforce (kill)
+    binary_paths:
+      - /usr/local/bin/candela-sidecar
+      - /candela-sidecar
+```
+
+### Data Flow
+
+```
+candela-policy.yaml (ConfigMap)
+        │
+        ├──→ candela-sidecar reads at startup
+        │    ├── builds Proxy with provider routing
+        │    ├── builds SNI → provider map for transparent listener
+        │    └── starts transparent listener on :15001
+        │
+        ├──→ Helm template generates FQDNNetworkPolicy
+        │    (iterates providers where intercept: true, extracts hosts)
+        │
+        ├──→ Helm template generates Tetragon TracingPolicy
+        │    (uses binary allowlist + port matching)
+        │
+        └──→ Helm template generates iptables init ConfigMap
+             (uses enforcement.transparent.port, proxy_uid)
+```
+
+## Enforcement Modes
+
+### Transparent Mode (`mode: transparent`)
+
+The recommended production mode. Uses Istio-style traffic interception:
+
+1. An **init container** configures `iptables` rules to redirect outbound port 443 traffic to the sidecar's listener port (`:15001`)
+2. The sidecar performs **SNI inspection** to identify the target LLM provider
+3. Traffic is proxied through Candela's full observability and policy pipeline
+4. Applications require **zero configuration changes** — they connect to `api.openai.com` as usual
+
+### Explicit Mode (`mode: explicit`)
+
+Applications are configured to point at the sidecar directly (e.g., `OPENAI_BASE_URL=http://localhost:8181/proxy/openai/v1`). No iptables redirect, no TLS interception. This is how Candela works today.
+
+## Tetragon Integration
+
+[Tetragon](https://tetragon.io/) provides eBPF-based runtime enforcement at the kernel level:
+
+- **Audit mode** (`Post`): Logs when unauthorized binaries attempt outbound TLS connections. Generates OTel events visible in the Candela dashboard.
+- **Enforce mode** (`Sigkill`): Terminates the process immediately. Use for high-security environments.
+
+The `TracingPolicy` hooks into `tcp_connect` and filters by destination port (443) and binary path. Only binaries in the allowlist (the Candela sidecar) are permitted to connect.
+
+## Phased Rollout
+
+| Phase | Milestone | Status |
+|-------|-----------|--------|
+| 0 | Config schema design (`candela-policy.yaml`) | <Badge text="In Design" variant="caution" /> |
+| 1 | Extend `Provider` struct with host/intercept fields | <Badge text="Planned" variant="default" /> |
+| 2 | Config file loading in `candela-sidecar` | <Badge text="Planned" variant="default" /> |
+| 3 | Helm chart with enforcement templates | <Badge text="Planned" variant="default" /> |
+| 4 | Transparent listener (Go — SNI routing) | <Badge text="Planned" variant="default" /> |
+| 5 | Transparent listener (Rust — `rustls`) | <Badge text="Planned" variant="default" /> |
+| 6 | Tetragon + Hubble observability integration | <Badge text="Planned" variant="default" /> |
+
+<Aside type="note">
+eBPF enforcement requires a Kubernetes environment with Cilium and Tetragon. It is designed for enterprise container deployments — local development and solo mode are unaffected.
+</Aside>

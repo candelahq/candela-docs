@@ -3,7 +3,8 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 
 export default defineConfig({
-	site: 'https://www.candelahq.com',
+	site: process.env.SITE_URL || 'https://candelahq.github.io',
+	base: process.env.SITE_BASE || '/candela-docs',
 	integrations: [
 		starlight({
 			title: 'Candela',
@@ -13,6 +14,7 @@ export default defineConfig({
 			favicon: '/favicon.png',
 			social: [
 				{ icon: 'github', label: 'GitHub', href: 'https://github.com/candelahq/candela' },
+				{ icon: 'external', label: 'Website', href: 'https://www.candelahq.com' },
 			],
 			customCss: ['./src/styles/custom.css'],
 			head: [
@@ -55,6 +57,17 @@ export default defineConfig({
 						{ label: 'candela-server', slug: 'components/candela-server' },
 						{ label: 'candela-sidecar', slug: 'components/candela-sidecar' },
 						{ label: 'candela-desktop', slug: 'components/candela-desktop' },
+					],
+				},
+				{
+					label: 'Governance',
+					items: [
+						{ label: 'Overview', slug: 'governance/overview' },
+						{ label: 'Budget Enforcement', slug: 'governance/budgets' },
+						{ label: 'Model Access Control', slug: 'governance/model-access' },
+						{ label: 'Audit & Compliance', slug: 'governance/audit-compliance' },
+						{ label: 'Tenant Isolation', slug: 'governance/multitenancy' },
+						{ label: 'eBPF Enforcement', slug: 'governance/ebpf-enforcement', badge: { text: 'Soon', variant: 'caution' } },
 					],
 				},
 				{

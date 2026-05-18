@@ -1,9 +1,9 @@
 ---
-title: Candela — LLM Observability Platform
-description: See what your LLMs are doing. Open-source observability for LLM traffic.
+title: Candela — LLM Governance Platform
+description: See everything. Enforce anything. Open-source governance for AI workloads.
 template: splash
 hero:
-  tagline: Open-source observability for LLM traffic. Trace requests, monitor costs, and manage providers across your entire AI infrastructure.
+  tagline: "See everything. Enforce anything. Open-source governance for your AI infrastructure — trace every request, enforce budgets, control model access, and prove compliance."
   image:
     alt: Candela — a candle with a neural-network flame
     file: ../../assets/logo.png
@@ -23,17 +23,38 @@ import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
 ## What You Get
 
 <CardGrid stagger>
-  <Card title="End-to-End Traces" icon="magnifier">
-    Every LLM request captured with OpenTelemetry — latency, TTFB, token counts, and cost — all in a unified trace tree with W3C Trace Context propagation.
+  <Card title="Policy Enforcement" icon="approve-check-circle">
+    Budget gates, rate limits, and model access controls enforced at the proxy layer in real time. Every policy violation logged to an immutable audit trail.
   </Card>
-  <Card title="Multi-Provider Routing" icon="setting">
-    Route to OpenAI, Gemini, Anthropic, Ollama, and LM Studio through a single endpoint. Smart routing picks the right backend automatically.
+  <Card title="Cost Governance" icon="seti:dollar">
+    Real-time cost calculation per request, per model, per tenant. Set per-user budgets, create time-bound grants, and get threshold alerts before spend is exceeded.
   </Card>
-  <Card title="Cost Intelligence" icon="approve-check-circle">
-    Real-time cost calculation per request, per model, per user. Set budgets and get alerts before they're exceeded.
+  <Card title="Full Observability" icon="magnifier">
+    Every LLM request captured with OpenTelemetry — latency, TTFB, token counts, cache hits, and cost — all in a unified trace tree with W3C Trace Context propagation.
   </Card>
   <Card title="Drop-In Integration" icon="puzzle">
-    Works with Google ADK, LangChain, LiteLLM, raw HTTP — anything that talks to an LLM endpoint. Point `base_url` at Candela and you're done.
+    Works with Google ADK, LangChain, Claude Code, Cursor, Zed, OpenCode — anything that talks to an LLM endpoint. Point `base_url` at Candela and you're done.
+  </Card>
+</CardGrid>
+
+---
+
+## Governance That Ships Today
+
+Candela is not a roadmap — these enforcement controls are live in production:
+
+<CardGrid>
+  <Card title="Budget Enforcement" icon="warning">
+    Per-user daily budgets with pre-flight gates. Requests that exceed limits get a `402` before they ever reach the LLM provider.
+  </Card>
+  <Card title="Rate Limiting" icon="setting">
+    Per-user request throttling prevents runaway automation from draining budgets. Minute-window counters with configurable limits.
+  </Card>
+  <Card title="Immutable Audit Trail" icon="document">
+    Every request, every admin action, every policy decision — logged to BigQuery, DuckDB, or SQLite. Tamper-proof by design.
+  </Card>
+  <Card title="Tenant Isolation" icon="random">
+    Full multi-tenant attribution via `X-Candela-Tenant-Id` headers and W3C Baggage. Per-tenant cost tracking, leaderboards, and scoped views.
   </Card>
 </CardGrid>
 
@@ -44,27 +65,27 @@ import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
 <CardGrid>
   <LinkCard
     title="candela"
-    description="Developer proxy + runtime manager. Run local & cloud models with built-in observability."
+    description="Developer proxy + runtime manager. Run local & cloud models with built-in governance and observability."
     href="/components/candela/"
   />
   <LinkCard
     title="candela-server"
-    description="Full backend with dashboard UI, BigQuery storage, optional budget enforcement, and team RBAC."
+    description="Full backend with dashboard UI, BigQuery storage, budget enforcement, policy controls, and team RBAC."
     href="/components/candela-server/"
   />
   <LinkCard
     title="candela-sidecar"
-    description="Lightweight < 5MB proxy for production containers. Pub/Sub + OTLP export."
+    description="Lightweight < 5MB proxy for production containers. Pub/Sub + OTLP export with budget enforcement."
     href="/components/candela-sidecar/"
   />
   <LinkCard
     title="candela-desktop"
-    description="Flutter desktop app for provider management and trace visualization."
+    description="Desktop app for provider management, cost monitoring, and trace visualization."
     href="/components/candela-desktop/"
   />
   <LinkCard
     title="Enrichment SDKs"
-    description="Lightweight SDKs for Python, TypeScript, Go, Kotlin, and Rust — propagate tenant and job metadata for multitenant cost attribution."
+    description="Lightweight SDKs for Python, TypeScript, Go, Kotlin, and Rust — propagate tenant and job metadata for governance attribution."
     href="/guides/enrichment-sdks/"
   />
 </CardGrid>
