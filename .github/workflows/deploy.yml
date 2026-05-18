@@ -25,6 +25,9 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+        env:
+          SITE_URL: https://www.candelahq.com
+          SITE_BASE: /
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
