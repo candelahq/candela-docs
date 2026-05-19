@@ -12,7 +12,7 @@ All Candela proxy components (`candela`, `candela-server`, `candela-sidecar`) ex
 | `/proxy/google/*` | Google Gemini | Native Gemini API | ADC |
 | `/proxy/gemini-oai/*` | Gemini (OpenAI-compatible) | OpenAI Chat Completions | ADC |
 | `/proxy/openai/*` | OpenAI | OpenAI Chat Completions | API key |
-| `/proxy/anthropic/*` | Anthropic (via Vertex AI) | Messages API (Legacy/Translated) | ADC |
+| `/proxy/anthropic/*` | Anthropic (via Vertex AI) | Translated to OpenAI format | ADC |
 | `/proxy/anthropic-vertex/*` | Anthropic (via Vertex AI) | Native Messages API | ADC |
 | `/proxy/anthropic-direct/*` | Anthropic (direct API) | Native Messages API | Anthropic API key |
 | `/proxy/anthropic-bedrock/*` | Anthropic (via AWS Bedrock) | Native Messages API | AWS SigV4 |
