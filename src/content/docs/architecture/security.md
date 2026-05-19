@@ -32,10 +32,10 @@ The middleware tries three strategies in sequence — the first successful valid
 |---|----------|--------|-------------|
 | 1 | **Firebase ID Token** | Browser UI | Firebase JS SDK |
 | 2 | **Google ID Token** | Service accounts, `candela` CLI | `idtoken.NewTokenSource(audience)` |
-| 3 | **OAuth2 Access Token** | `candela` with user ADC | `gcloud auth application-default login` |
+| 3 | **OAuth2 Access Token** | `candela` with user ADC | `candela auth login` (or `gcloud auth application-default login`) |
 
 :::note
-Strategy 3 calls Google's userinfo endpoint, adding ~50ms latency. This is the only way to validate user-scoped ADC that `candela` uses with `gcloud auth application-default login`.
+Strategy 3 calls Google's userinfo endpoint, adding ~50ms latency. This is the only way to validate user-scoped ADC that `candela` uses with `candela auth login` (or `gcloud auth application-default login`).
 :::
 
 ---
@@ -104,7 +104,7 @@ AND (? = '' OR user_id = ?)
 | Mode | Auth Required | How |
 |------|:------------:|-----|
 | **Solo** | No | All requests to `:1234` and `:8181` are unauthenticated |
-| **Solo + Cloud** | ADC only | `gcloud auth application-default login` — tokens used for upstream Vertex AI calls |
+| **Solo + Cloud** | ADC only | `candela auth login` — tokens used for upstream Vertex AI calls |
 | **Team** | OIDC | `candela` injects Google ID tokens into requests to the Candela server |
 
 ### Team Mode Token Flow

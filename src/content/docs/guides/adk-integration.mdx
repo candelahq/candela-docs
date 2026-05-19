@@ -157,7 +157,7 @@ If you just need to tag all requests from a single service, set the headers dire
 |---------|-------|-----|
 | Agent works but no proxy spans | `base_url` not set or wrong port | Verify with `curl http://localhost:8080/healthz` |
 | Proxy spans have separate trace ID | `traceparent` not propagated | Install `opentelemetry-instrumentation-httpx` |
-| `401 Unauthorized` from sidecar | Missing ADC credentials | Run `gcloud auth application-default login` |
+| `401 Unauthorized` from sidecar | Missing ADC credentials | Run `candela auth login` (or `gcloud auth application-default login`) |
 | Cost shows $0.00 | Unknown model in pricing table | Check collector logs for missing pricing |
 | ADK import error for `Gemini` | Old ADK version | `pip install --upgrade google-adk` |
 | Tenant/job not showing in dashboard | Enrichment headers not injected | Use the [Enrichment SDK](/guides/enrichment-sdks/) or set `X-Candela-Tenant-Id` manually |
