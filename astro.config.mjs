@@ -85,6 +85,7 @@ export default defineConfig({
 							label: 'IDE Integration',
 							items: [
 								{ label: 'Overview', slug: 'guides/ide/overview' },
+								{ label: 'VS Code Extension', slug: 'guides/ide/vscode' },
 								{ label: 'OpenCode', slug: 'guides/ide/opencode' },
 								{ label: 'Zed', slug: 'guides/ide/zed' },
 								{ label: 'Cline / Continue', slug: 'guides/ide/cline' },
@@ -108,6 +109,7 @@ export default defineConfig({
 					label: 'API Reference',
 					items: [
 						{ label: 'Proxy Routes', slug: 'api/proxy-routes' },
+						{ label: 'ConnectRPC Services', slug: 'api/connectrpc' },
 					],
 				},
 			],
