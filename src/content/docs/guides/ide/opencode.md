@@ -96,10 +96,10 @@ Or install it inside your project workspace:
 npm install --save-dev opencode-candela
 ```
 
-And link/register the plugin path:
+And link/register the plugin path (using a symlink ensures it stays up-to-date automatically):
 ```bash
-mkdir -p ~/.config/opencode/plugins/opencode-candela
-cp -r node_modules/opencode-candela/src/* ~/.config/opencode/plugins/opencode-candela/
+mkdir -p ~/.config/opencode/plugins
+ln -s "$(pwd)/node_modules/opencode-candela/src" ~/.config/opencode/plugins/opencode-candela
 ```
 
 ### Configuration Options

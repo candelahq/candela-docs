@@ -40,8 +40,24 @@ Consolidates usage summaries, model breakdowns, and user budget status in a sing
 
 Retrieves latency distributions (`p50`, `p90`, `p95`, `p99`) and a time-series history for charts.
 
-* **Request**: `GetLatencyPercentilesRequest` (takes `project_id`, `time_range`, and optional `model` filter)
+* **Request**: `GetLatencyPercentilesRequest`
+  ```protobuf
+  message GetLatencyPercentilesRequest {
+    string project_id = 1;
+    candela.types.TimeRange time_range = 2;
+    string model = 3; // optional: filter by model
+  }
+  ```
 * **Response**: `GetLatencyPercentilesResponse`
+  ```protobuf
+  message GetLatencyPercentilesResponse {
+    double p50_ms = 1;
+    double p90_ms = 2;
+    double p95_ms = 3;
+    double p99_ms = 4;
+    repeated TimeSeriesPoint latency_over_time = 10;
+  }
+  ```
 
 ### Deprecated Endpoints
 

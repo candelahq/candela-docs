@@ -78,7 +78,7 @@ When Cline runs multi-step tasks autonomously, every individual LLM call is trac
 For deeper integration, install the official `candela-cline` plugin package. This enables Cline to run custom tools inside its workspace to query session spend, check daily budgets, and ensure proxy health.
 
 ### Features
-* **Session Cost summaries**: Formats a detailed summary of token usage, requests, spend, and cache savings for the active coding session.
+* **Session Cost Summaries**: Formats a detailed summary of token usage, requests, spend, and cache savings for the active coding session.
 * **Live Budget Check**: Inspects daily budget limits, current consumption percentage, remaining allowance, and active grant waterfall breakdown (including expiries).
 * **Automatic Health Check**: Ensures that the local `candela` daemon is active and responsive before running heavy automated tasks.
 
