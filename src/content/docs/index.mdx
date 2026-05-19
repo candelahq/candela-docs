@@ -56,6 +56,9 @@ Candela is not a roadmap — these enforcement controls are live in production:
   <Card title="Tenant Isolation" icon="random">
     Full multi-tenant attribution via `X-Candela-Tenant-Id` headers and W3C Baggage. Per-tenant cost tracking, leaderboards, and scoped views.
   </Card>
+  <Card title="eBPF Enforcement" icon="approve-check-circle">
+    Kernel-level traffic interception via iptables redirect and Tetragon policies. Zero SDK changes — every LLM request flows through the proxy, guaranteed.
+  </Card>
 </CardGrid>
 
 ---

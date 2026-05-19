@@ -48,6 +48,7 @@ export default defineConfig({
 						{ label: 'Overview', slug: 'getting-started/overview' },
 						{ label: 'Installation', slug: 'getting-started/installation' },
 						{ label: 'Quick Start', slug: 'getting-started/quickstart' },
+						{ label: 'Authentication', slug: 'getting-started/authentication', badge: { text: 'New', variant: 'success' } },
 					],
 				},
 				{
@@ -67,7 +68,7 @@ export default defineConfig({
 						{ label: 'Model Access Control', slug: 'governance/model-access' },
 						{ label: 'Audit & Compliance', slug: 'governance/audit-compliance' },
 						{ label: 'Tenant Isolation', slug: 'governance/multitenancy' },
-						{ label: 'eBPF Enforcement', slug: 'governance/ebpf-enforcement', badge: { text: 'Soon', variant: 'caution' } },
+						{ label: 'eBPF Enforcement', slug: 'governance/ebpf-enforcement', badge: { text: 'New', variant: 'success' } },
 					],
 				},
 				{
@@ -77,6 +78,7 @@ export default defineConfig({
 						{ label: 'OpenTelemetry', slug: 'guides/opentelemetry' },
 						{ label: 'Budgets & Cost Control', slug: 'guides/budgets' },
 						{ label: 'Pricing', slug: 'guides/pricing' },
+						{ label: 'Prompt Caching', slug: 'guides/prompt-caching', badge: { text: 'New', variant: 'success' } },
 						{ label: 'Enrichment SDKs', slug: 'guides/enrichment-sdks' },
 						{ label: 'Multitenancy', slug: 'guides/multitenancy' },
 						{
