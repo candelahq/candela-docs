@@ -5,9 +5,7 @@ description: Kernel-level enforcement ensuring all LLM traffic flows through the
 
 import { Badge, Aside } from '@astrojs/starlight/components';
 
-<Badge text="Coming Soon" variant="caution" size="large" />
-
-Candela will add **kernel-level enforcement** to guarantee that all LLM API traffic flows through the proxy — making observability, budget controls, and policy enforcement impossible to bypass, even by misconfigured or malicious workloads.
+Candela provides **kernel-level enforcement** to guarantee that all LLM API traffic flows through the proxy — making observability, budget controls, and policy enforcement impossible to bypass, even by misconfigured or malicious workloads.
 
 ## Why Enforcement?
 
@@ -44,7 +42,7 @@ Applications connect to LLM APIs as usual. An `iptables` init container transpar
 Candela uses a **"belt and suspenders"** approach — multiple independent enforcement mechanisms that work together:
 
 | Layer | Technology | Purpose |
-|-------|-----------|---------|
+|-------|-----------|---------| 
 | **Network** | Cilium `FQDNNetworkPolicy` | Block direct egress to LLM provider hostnames for non-proxy pods |
 | **Kernel** | Tetragon `TracingPolicy` (eBPF kprobes) | Detect or kill unauthorized binaries connecting to port 443 |
 | **Redirect** | `iptables` init container | Transparently redirect outbound TLS to the sidecar listener |
@@ -52,6 +50,33 @@ Candela uses a **"belt and suspenders"** approach — multiple independent enfor
 
 <Aside type="tip">
 Each layer is independently useful. You can start with just `iptables` redirect (transparent proxy), add Cilium network policy for defense-in-depth, and layer on Tetragon for process-level enforcement.
+</Aside>
+
+## Quick Start
+
+Deploy the Candela sidecar with transparent proxy enforcement using the Helm chart:
+
+```bash
+helm install candela-sidecar deploy/helm/candela-sidecar \
+  --set enforcement.enabled=true \
+  --set enforcement.mode=transparent \
+  --set enforcement.transparent.port=15001 \
+  --set providers.openai.intercept=true \
+  --set providers.anthropic.intercept=true \
+  --set providers.google.intercept=true
+```
+
+For a minimal test, enable just the iptables redirect without Cilium or Tetragon:
+
+```bash
+helm install candela-sidecar deploy/helm/candela-sidecar \
+  --set enforcement.enabled=true \
+  --set enforcement.mode=transparent \
+  --set enforcement.tetragon.enabled=false
+```
+
+<Aside type="note">
+The Helm chart lives at `deploy/helm/candela-sidecar/` in the main [candela](https://github.com/candelahq/candela) repository. See the chart's [README](https://github.com/candelahq/candela/tree/main/deploy/helm/candela-sidecar) for all available values.
 </Aside>
 
 ## Single Source of Truth
@@ -130,7 +155,7 @@ The recommended production mode. Uses Istio-style traffic interception:
 
 ### Explicit Mode (`mode: explicit`)
 
-Applications are configured to point at the sidecar directly (e.g., `OPENAI_BASE_URL=http://localhost:8181/proxy/openai/v1`). No iptables redirect, no TLS interception. This is how Candela works today.
+Applications are configured to point at the sidecar directly (e.g., `OPENAI_BASE_URL=http://localhost:8181/proxy/openai/v1`). No iptables redirect, no TLS interception. This is how Candela works in local development mode.
 
 ## Tetragon Integration
 
@@ -141,16 +166,16 @@ Applications are configured to point at the sidecar directly (e.g., `OPENAI_BASE
 
 The `TracingPolicy` hooks into `tcp_connect` and filters by destination port (443) and binary path. Only binaries in the allowlist (the Candela sidecar) are permitted to connect.
 
-## Phased Rollout
+## Implementation Status
 
 | Phase | Milestone | Status |
 |-------|-----------|--------|
-| 0 | Config schema design (`candela-policy.yaml`) | <Badge text="In Design" variant="caution" /> |
-| 1 | Extend `Provider` struct with host/intercept fields | <Badge text="Planned" variant="default" /> |
-| 2 | Config file loading in `candela-sidecar` | <Badge text="Planned" variant="default" /> |
-| 3 | Helm chart with enforcement templates | <Badge text="Planned" variant="default" /> |
-| 4 | Transparent listener (Go — SNI routing) | <Badge text="Planned" variant="default" /> |
-| 5 | Transparent listener (Rust — `rustls`) | <Badge text="Planned" variant="default" /> |
+| 0 | Config schema design (`candela-policy.yaml`) | <Badge text="Shipped" variant="success" /> |
+| 1 | Extend `Provider` struct with host/intercept fields | <Badge text="Shipped" variant="success" /> |
+| 2 | Config file loading in `candela-sidecar` | <Badge text="Shipped" variant="success" /> |
+| 3 | Helm chart with enforcement templates | <Badge text="Shipped" variant="success" /> |
+| 4 | Transparent listener (Go — SNI routing) | <Badge text="Shipped" variant="success" /> |
+| 5 | Transparent listener (Rust — `rustls`) | <Badge text="In Progress" variant="caution" /> |
 | 6 | Tetragon + Hubble observability integration | <Badge text="Planned" variant="default" /> |
 
 <Aside type="note">

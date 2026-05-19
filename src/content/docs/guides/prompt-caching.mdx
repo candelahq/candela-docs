@@ -1,0 +1,127 @@
+---
+title: Prompt Caching
+description: Configure Anthropic prompt caching and Gemini cache discounts for optimized LLM costs.
+---
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+
+Candela supports **Anthropic prompt caching** out of the box — automatically injecting cache control headers, tracking cache hit/miss metrics, and calculating the true cost of cached vs. uncached tokens.
+
+## How Anthropic Prompt Caching Works
+
+When enabled, Anthropic caches the system prompt and early conversation turns at the API level. Subsequent requests that share the same prefix receive a **cache hit**, dramatically reducing both latency and cost.
+
+Candela manages this transparently:
+1. Injects `cache_control` markers into eligible message blocks
+2. Tracks `cache_creation_input_tokens` and `cache_read_input_tokens` from the response
+3. Applies the correct pricing multiplier based on your TTL setting
+4. Reports cache savings in the dashboard and trace details
+
+## Cache TTL Modes
+
+Anthropic offers two cache TTL (time-to-live) options with different pricing:
+
+| TTL | Write Cost | Read Cost | Best For |
+|-----|-----------|-----------|----------|
+| **5 minutes** (default) | 1.25× input price | 0.1× input price | Short interactive sessions, chat |
+| **1 hour** | 2.0× input price | 0.1× input price | Long coding sessions, agents, batch processing |
+
+<Aside type="tip">
+The **read cost is the same** (0.1×) regardless of TTL. The only difference is the upfront write cost. If your sessions regularly reuse the same context for more than 5 minutes, the 1-hour TTL pays for itself quickly.
+</Aside>
+
+### Cost Calculation Example
+
+For Claude Sonnet 4 ($3/MTok input):
+
+| Scenario | Tokens | TTL | Cost |
+|----------|--------|-----|------|
+| Cache write (first request) | 10,000 | 5m | $0.0375 (10K × $3 × 1.25 / 1M) |
+| Cache write (first request) | 10,000 | 1h | $0.06 (10K × $3 × 2.0 / 1M) |
+| Cache read (subsequent) | 10,000 | any | $0.003 (10K × $3 × 0.1 / 1M) |
+| No cache (baseline) | 10,000 | — | $0.03 (10K × $3 / 1M) |
+
+After just **2 cache reads**, the 5m TTL breaks even. After **3 reads**, the 1h TTL breaks even — and you get 12× longer cache retention.
+
+## Configuring Cache TTL
+
+### Candela Desktop
+
+In **Settings → Prompt Caching**, toggle between:
+- **Standard (5 min)** — lower upfront cost, suitable for short sessions
+- **Extended (1 hour)** — higher upfront cost, ideal for long coding sessions with Claude Code
+
+The setting takes effect immediately for all subsequent proxy requests.
+
+### Runtime API
+
+Toggle the cache TTL programmatically:
+
+```bash
+# Set 1-hour TTL
+curl -X POST http://localhost:8181/_local/api/config \
+  -H "Content-Type: application/json" \
+  -d '{"anthropic_cache_ttl": "1h"}'
+
+# Check current config
+curl http://localhost:8181/_local/api/config
+```
+
+### Config File
+
+Set the default in `~/.config/candela/config.yaml`:
+
+```yaml
+proxy:
+  anthropic:
+    cache_mode: auto          # off | auto | system-only
+    cache_ttl: 5m             # 5m (default) | 1h
+```
+
+| `cache_mode` | Behavior |
+|-------------|----------|
+| `off` | No cache headers injected |
+| `auto` | Cache system prompt + early turns automatically |
+| `system-only` | Only cache the system prompt |
+
+## Cache Metrics in the Dashboard
+
+Candela tracks cache performance across all Anthropic requests:
+
+| Metric | Description |
+|--------|-------------|
+| **Cache hit rate** | Percentage of input tokens served from cache |
+| **Cache savings** | USD saved vs. full-price input tokens |
+| **Write tokens** | Tokens written to cache (charged at 1.25× or 2.0×) |
+| **Read tokens** | Tokens read from cache (charged at 0.1×) |
+
+These metrics appear in:
+- **Dashboard** — aggregate cache savings in the cost overview
+- **Trace detail** — per-request cache breakdown
+- **Models view** — per-model cache hit rates
+
+## Gemini Cache Discount
+
+For Google Gemini models, cached content is priced at a discount from the standard input rate. Configure the discount factor:
+
+```bash
+# Set Gemini cache discount (0.0 = free, 1.0 = no discount)
+curl -X POST http://localhost:8181/_local/api/config \
+  -H "Content-Type: application/json" \
+  -d '{"gemini_cache_discount": 0.25}'
+```
+
+<Aside type="note">
+The `gemini_cache_discount` value must be between `0.0` and `1.0`. Invalid values return a `400 Bad Request` response. The default is `0.25` (75% discount on cached tokens), matching Google's current Gemini pricing.
+</Aside>
+
+The current discount value is reflected in the `GET /_local/api/config` response, so clients can display the active configuration.
+
+## Troubleshooting
+
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| Cache hit rate is 0% | `cache_mode` set to `off` | Set to `auto` in config or desktop settings |
+| High write costs | Using 1h TTL with short sessions | Switch to 5m TTL if sessions are under 5 minutes |
+| Cache not persisting | TTL expired between requests | Increase TTL or reduce time between requests |
+| Cost shows $0 for cache tokens | Model not in pricing table | Check server logs for unrecognized model warnings |

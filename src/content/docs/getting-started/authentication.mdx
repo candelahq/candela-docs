@@ -1,0 +1,133 @@
+---
+title: Authentication
+description: Set up credentials for cloud LLM providers with Candela's native auth commands.
+---
+
+import { Tabs, TabItem, Aside, Steps, Badge } from '@astrojs/starlight/components';
+
+Candela includes **native authentication** — no `gcloud` or `aws` CLI required. The `candela auth` commands handle OAuth2 flows, credential storage, and token refresh for all supported cloud providers.
+
+## Quick Start
+
+<Steps>
+
+1. **Authenticate with your cloud provider**
+
+   <Tabs>
+     <TabItem label="GCP (Default)">
+       ```bash
+       candela auth login
+       ```
+       Opens a browser for Google OAuth2 consent. On success, writes Application Default Credentials (ADC) to `~/.config/gcloud/application_default_credentials.json`.
+     </TabItem>
+     <TabItem label="AWS Bedrock">
+       ```bash
+       candela auth login --provider aws
+       ```
+       Validates your existing AWS credentials (from `~/.aws/credentials`, SSO, or environment variables) and confirms Bedrock model access.
+     </TabItem>
+   </Tabs>
+
+2. **Verify your credentials**
+
+   ```bash
+   candela auth status
+   ```
+
+   Shows the active provider, credential source, token expiry, and project/region configuration.
+
+3. **Start using Candela**
+
+   ```bash
+   candela start
+   ```
+
+   The proxy automatically uses your authenticated credentials to forward requests to cloud LLM APIs.
+
+</Steps>
+
+## Auth Commands
+
+| Command | Description |
+|---------|-------------|
+| `candela auth login` | Start OAuth2 flow for GCP (default) |
+| `candela auth login --provider aws` | Validate AWS credentials for Bedrock |
+| `candela auth status` | Show active credentials, provider, and expiry |
+| `candela auth token` | Print a valid access token (refreshes if expired) |
+
+## How It Works
+
+### GCP (Google Cloud / Vertex AI)
+
+Candela performs a standard OAuth2 authorization code flow:
+
+1. Opens your browser to Google's consent screen
+2. Receives the authorization code via a local callback server
+3. Exchanges the code for access and refresh tokens
+4. Writes the credentials as an [Application Default Credentials (ADC)](https://cloud.google.com/docs/authentication/application-default-credentials) JSON file
+
+The ADC file is stored at `~/.config/gcloud/application_default_credentials.json` — the same location used by Google Cloud client libraries. This means your credentials work seamlessly with:
+- Candela proxy routes (`/proxy/anthropic`, `/proxy/google`, etc.)
+- Any Google Cloud SDK or client library
+- The Candela Desktop app (reads and refreshes tokens directly)
+
+<Aside type="tip">
+`candela auth token` outputs a fresh access token on stdout. Use it to pipe into scripts or verify that token refresh is working: `candela auth token | head -c 20`
+</Aside>
+
+### AWS (Bedrock)
+
+For AWS Bedrock, Candela reads your existing AWS credential chain:
+
+1. Environment variables (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`)
+2. Shared credentials file (`~/.aws/credentials`)
+3. SSO session credentials (`aws configure sso`)
+4. IAM instance profile (for EC2/ECS/Lambda)
+
+`candela auth login --provider aws` validates the active credentials and checks that the configured region has Bedrock model access enabled.
+
+<Aside type="note">
+If you use named AWS profiles, set the profile in your Candela config:
+
+```yaml
+# ~/.config/candela/config.yaml
+aws:
+  region: us-east-1
+  profile: my-profile
+```
+</Aside>
+
+## Token Lifecycle
+
+| Event | Behavior |
+|-------|----------|
+| Token valid | Proxy uses cached token — zero overhead |
+| Token expired (< 5 min remaining) | Automatic background refresh using the stored refresh token |
+| Refresh token revoked | `candela auth status` shows "expired" — run `candela auth login` again |
+| No credentials found | Proxy returns `401` with a clear error message directing you to `candela auth login` |
+
+The Candela Desktop app performs the same token refresh cycle directly against `oauth2.googleapis.com/token`, showing the real token expiry time in the dashboard (not a hardcoded estimate).
+
+## Legacy: Using gcloud CLI
+
+If you already have `gcloud` installed, its credentials also work:
+
+```bash
+gcloud auth application-default login
+```
+
+This writes the same ADC file that Candela reads. However, `candela auth login` is preferred because:
+- No `gcloud` CLI installation required
+- Faster startup (no subprocess overhead)
+- Works identically on all platforms
+- The Desktop app can refresh tokens without shelling out
+
+## Troubleshooting
+
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| `401 Unauthorized` on proxy requests | No valid credentials | Run `candela auth login` |
+| `candela auth status` shows "expired" | Refresh token revoked or consent withdrawn | Run `candela auth login` again |
+| `403 Forbidden` on Anthropic routes | Claude models not enabled in Vertex AI | Enable in [Model Garden](https://console.cloud.google.com/vertex-ai/model-garden) |
+| AWS `InvalidSignatureException` | Clock skew or wrong region | Verify region in config matches Bedrock availability |
+| Token refresh loop | Corrupted ADC file | Delete `~/.config/gcloud/application_default_credentials.json` and re-run `candela auth login` |
