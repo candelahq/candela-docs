@@ -1,0 +1,98 @@
+---
+title: System Prompt Caching
+description: Optimize LLM latency and costs using system prompt caching and context caching for Anthropic and Google Gemini.
+---
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+
+System prompt caching (and context caching) allows you to cache large blocks of static context—such as system instructions, boilerplate codebase references, background documentation, or long conversation histories—at the LLM provider level. Subsequent requests that reuse this context bypass full-cost token parsing, resulting in **significantly reduced API costs** and **sub-second time-to-first-token latency**.
+
+Candela integrates with prompt caching transparently, auto-normalizing cache metrics and applying the correct pricing discounts directly to user budget calculations.
+
+---
+
+## Provider Comparison
+
+While the goal of prompt caching is the same for all providers, the implementation details, billing structures, and minimum token thresholds differ significantly.
+
+| Feature | Anthropic Claude | Google Gemini (1.5/2.5/3.x) |
+| :--- | :--- | :--- |
+| **Caching Technology** | Prompt Caching (Prefix Caching) | Context Caching (Persistent Memory) |
+| **Minimum Prompt Size** | **1,024 tokens** (Sonnet/Haiku)<br />**2,048 tokens** (Opus) | **32,768 tokens** (All models) |
+| **Write Cost (Cache Create)** | 1.25× base price (5m TTL)<br />2.0× base price (1h TTL) | No surcharge (Free to create) |
+| **Read Cost (Cache Hit)** | **90% off** base price (0.1× cost) | **75% off** base price (0.25× cost) |
+| **Cache Lifetime (TTL)** | Sliding window: 5 mins to 1 hour | User-configurable (Default: 300s / 5m) |
+| **Ideal Use Case** | Fast developer loops, agent actions | Large documents, codebase context, media analysis |
+
+<Aside type="caution" title="Minimum Thresholds">
+If your prompt size falls below the minimum threshold (1,024 tokens for Claude Sonnet, 32,768 tokens for Gemini), the provider **will not cache the prompt** and you will be charged standard input rates.
+</Aside>
+
+---
+
+## How It Works
+
+### Anthropic Claude
+When a request is sent, Candela automatically injects `cache_control` headers into eligible sections of your messages (e.g. system prompt and early turns) if `cache_mode` is set to `auto`. Anthropic charges an upfront write surcharge to build the cache, but subsequent turns inside the TTL enjoy a 90% read discount.
+
+### Google Gemini
+Google Gemini caching is managed as **Context Caching** in Vertex AI. Because Google does not charge a write surcharge, creating a cache is extremely cost-effective for large payloads. Cached tokens are charged at a flat 75% discount off standard input rates. Candela automatically reads Google's `cachedContentTokenCount` response metadata to apply the discount.
+
+---
+
+## Configuring Caching in Candela
+
+You can configure caching defaults in your configuration file, or dynamically adjust them at runtime.
+
+### Configuration File (`config.yaml`)
+
+Edit your `config.yaml` to define default caching behaviors:
+
+```yaml
+proxy:
+  vertex_ai:
+    prompt_caching: true    # Enable cache header injection for Anthropic
+    cache_ttl: 5m           # TTL for Claude: 5m (1.25x write) or 1h (2.0x write)
+
+  # Gemini Caching Discount Override
+  # 0.25 = 75% off cached tokens (Default, matches Google Vertex AI list prices)
+  # 0.00 = Cached tokens are free
+  # 1.00 = No cache discount applied
+  gemini_cache_discount: 0.25
+```
+
+### Runtime API Updates
+
+You can toggle caching settings on-the-fly without restarting the `candela-server` proxy:
+
+<Tabs>
+  <TabItem label="Update Anthropic TTL">
+    ```bash
+    # Set Anthropic cache TTL to 1 hour (ideal for long-running agent tasks)
+    curl -X POST http://localhost:8181/_local/api/config \
+      -H "Content-Type: application/json" \
+      -d '{"proxy": {"vertex_ai": {"cache_ttl": "1h"}}}'
+    ```
+  </TabItem>
+  <TabItem label="Update Gemini Discount">
+    ```bash
+    # Update Gemini cache discount to 90% (0.10) for custom corporate pricing agreements
+    curl -X POST http://localhost:8181/_local/api/config \
+      -H "Content-Type: application/json" \
+      -d '{"gemini_cache_discount": 0.10}'
+    ```
+  </TabItem>
+</Tabs>
+
+---
+
+## Cost Optimization Strategy
+
+To get the most out of system prompt caching:
+
+1.  **Structure your Prompts:** Put static instructions, system definitions, tools/functions, and reference documents **at the very beginning** of your prompt. Put the fast-moving user query at the very end.
+2.  **Combine Small System Prompts:** If your system prompt is just under the 1,024/2,048 token threshold for Claude, consider adding developer guidelines or schemas to push it past the minimum size and activate caching.
+3.  **Choose the Right TTL:**
+    *   Use **5 minutes** for quick chat sessions.
+    *   Use **1 hour** for developer loops (e.g., using Cline/Zed/Cursor with Candela) where files are constantly re-read over an extended period.
+4.  **Use Gemini for Large Multi-modal Files:** If you are feeding entire PDFs or codebase dumps (exceeding 32k tokens), routing them to Gemini models utilizing Vertex AI Context Caching will yield the highest cost savings since there is no cache write surcharge.
