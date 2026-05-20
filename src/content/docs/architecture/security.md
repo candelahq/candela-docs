@@ -151,6 +151,11 @@ All requests are validated server-side using [`protovalidate`](https://github.co
 | Proxy does not store upstream API keys | ✅ |
 | CORS origin allowlist | ✅ |
 | Audit logging for admin actions | ✅ |
+| eBPF enforcement (Tetragon + Cilium + iptables) | ✅ |
+| Circuit breaker resilience for upstream providers | ✅ |
+| Fuzz testing for proxy SSE parser | ✅ |
+| Tetragon gRPC audit pipeline with graceful shutdown | ✅ |
+| Multi-cloud auth (GCP OAuth2 + AWS SSO) | ✅ |
 
 :::caution[Dev Mode]
 When `auth.dev_mode: true`, all requests get full admin access with no token validation. **Never enable in production.**

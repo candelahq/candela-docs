@@ -30,6 +30,9 @@ Every Candela deployment — whether `candela` on a developer laptop or `candela
   <Card title="Multi-Provider Routing" icon="puzzle">
     Route to OpenAI, Gemini, Anthropic, Ollama, and LM Studio through a single endpoint. All traffic — regardless of provider — passes through the same governance pipeline.
   </Card>
+  <Card title="eBPF Enforcement" icon="rocket">
+    Kernel-level enforcement ensures all LLM traffic flows through the proxy. Transparent `iptables` redirection with SNI-based routing, Cilium network policies, and Tetragon process enforcement — making bypass impossible, even by misconfigured workloads.
+  </Card>
 </CardGrid>
 
 ---
@@ -123,3 +126,4 @@ These governance capabilities are designed and tracked on the [Enterprise Govern
 <LinkCard title="Model Access Control" description="Restrict which LLM models your users and tenants can access." href="/governance/model-access/" />
 <LinkCard title="Audit & Compliance" description="Immutable audit trails, compliance scoring, and exportable reports." href="/governance/audit-compliance/" />
 <LinkCard title="Multitenancy" description="Tenant isolation, attribution, and per-tenant governance controls." href="/governance/multitenancy/" />
+<LinkCard title="eBPF Enforcement" description="Kernel-level enforcement via Tetragon, Cilium, and iptables — guarantee all LLM traffic flows through the proxy." href="/governance/ebpf-enforcement/" />
