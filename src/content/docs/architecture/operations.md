@@ -165,22 +165,50 @@ ORDER BY total_cost DESC
 
 ## Maintenance
 
-### Updating Model Pricing
+### Updating Model Pricing & Adding New Models
 
-When providers change prices:
-1. Update `pkg/costcalc/calculator.go` → `loadDefaults()`
-2. Run tests: `go test ./pkg/costcalc -v`
-3. Deploy — pricing takes effect on next restart
+When you want to add new models (like Gemini 3.5 Flash) or update built-in model pricing, you have two options:
 
-Or use config overrides without redeploying:
-```yaml
-pricing:
-  models:
-    - provider: google
-      model: gemini-2.5-pro
-      input_per_million: 1.25
-      output_per_million: 10.00
-```
+#### Option A: Update Code Defaults (Requires Build & Redeploy)
+This is the recommended approach for adding new models long-term so that the proxy ships with correct built-in default rates.
+1. **Modify Defaults:** Update the list of models in `pkg/costcalc/calculator.go` within `loadDefaults()`.
+2. **Write Tests:** Add test cases checking the pricing calculation logic in `pkg/costcalc/calculator_test.go`.
+3. **Run Tests:** Verify correctness locally:
+   ```bash
+   go test ./pkg/costcalc -v
+   ```
+4. **Build and Redeploy:** Run the build pipeline and redeploy to Google Cloud Run:
+   ```bash
+   # Build the container image
+   gcloud builds submit --project $PROJECT -f deploy/cloudbuild.yaml .
+
+   # Redeploy the Cloud Run service to apply the update
+   gcloud run services update candela \
+     --project $PROJECT --region $REGION \
+     --image $REGION-docker.pkg.dev/$PROJECT/candela/candela-server:latest
+   ```
+
+#### Option B: Configure Runtime Overrides (No Code Changes Required)
+You can override model pricing or add temporary support for a new model without rebuilding/redeploying code by modifying your active configuration:
+
+1. **Config File (`config.yaml`):** Add per-model overrides under the `pricing.models` block:
+   ```yaml
+   pricing:
+     models:
+       - provider: google
+         model: gemini-3.5-flash
+         input_per_million: 0.40      # Negociated rate (List: $0.50)
+         output_per_million: 2.40     # Negociated rate (List: $3.00)
+   ```
+   *Note: If you update `config.yaml` for a deployed service, redeploy or restart the Cloud Run service to load the new config.*
+
+2. **Runtime Configuration Endpoint:** You can dynamically update configuration parameters and pricing overrides instantly without service restarts:
+   ```bash
+   curl -X POST http://localhost:8181/_local/api/config \
+     -H "Content-Type: application/json" \
+     -d '{"pricing": {"models": [{"provider": "google", "model": "gemini-3.5-flash", "input_per_million": 0.40, "output_per_million": 2.40}]}}'
+   ```
+
 
 ### Database Migrations
 

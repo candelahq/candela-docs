@@ -16,7 +16,7 @@ description: Connect Cursor or Windsurf to Candela for traced AI coding sessions
 |---------|-------|
 | **API Base** | `http://localhost:1234/v1` |
 | **API Key** | `candela` |
-| **Model** | `gemini-2.5-pro` (or any model from `/v1/models`) |
+| **Model** | `gemini-3.5-pro` (or any model from `/v1/models`) |
 
 ### Claude Models
 
@@ -54,7 +54,7 @@ Windsurf supports custom OpenAI-compatible endpoints:
 |---------|-------|
 | **Base URL** | `http://localhost:1234/v1` |
 | **API Key** | `candela` |
-| **Model** | `gemini-2.5-pro` |
+| **Model** | `gemini-3.5-pro` |
 
 ---
 

@@ -15,7 +15,7 @@ description: Connect Cline (VS Code) to Candela for traced AI coding.
 |---------|-------|
 | **Base URL** | `http://localhost:1234/v1` |
 | **API Key** | `candela` |
-| **Model ID** | `gemini-2.5-pro` (or any model from `/v1/models`) |
+| **Model ID** | `gemini-3.5-pro` (or any model from `/v1/models`) |
 
 ### Alternative: Settings JSON
 
@@ -26,7 +26,7 @@ Add to your VS Code `settings.json`:
   "cline.apiProvider": "openai-compatible",
   "cline.openaiBaseUrl": "http://localhost:1234/v1",
   "cline.openaiApiKey": "candela",
-  "cline.openaiModelId": "gemini-2.5-pro"
+  "cline.openaiModelId": "gemini-3.5-pro"
 }
 ```
 
@@ -54,7 +54,7 @@ Candela still traces every request — you get full token counts and latency met
       "provider": "openai",
       "apiBase": "http://localhost:1234/v1",
       "apiKey": "candela",
-      "model": "gemini-2.5-pro"
+      "model": "gemini-3.5-pro"
     },
     {
       "title": "Candela — Local Llama",

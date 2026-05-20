@@ -79,6 +79,7 @@ export default defineConfig({
 						{ label: 'Budgets & Cost Control', slug: 'guides/budgets' },
 						{ label: 'Pricing', slug: 'guides/pricing' },
 						{ label: 'Prompt Caching', slug: 'guides/prompt-caching', badge: { text: 'New', variant: 'success' } },
+						{ label: 'System Prompt Caching', slug: 'guides/system-prompt-caching', badge: { text: 'New', variant: 'success' } },
 						{ label: 'Enrichment SDKs', slug: 'guides/enrichment-sdks' },
 						{ label: 'Multitenancy', slug: 'guides/multitenancy' },
 						{

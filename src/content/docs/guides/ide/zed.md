@@ -17,13 +17,13 @@ Edit your Zed settings (`~/.config/zed/settings.json` or `Cmd+,`):
       "api_key": "candela",
       "available_models": [
         {
-          "name": "gemini-2.5-pro",
-          "display_name": "Gemini 2.5 Pro (via Candela)",
+          "name": "gemini-3.5-pro",
+          "display_name": "Gemini 3.5 Pro (via Candela)",
           "max_tokens": 8192
         },
         {
-          "name": "gemini-2.5-flash",
-          "display_name": "Gemini 2.5 Flash (via Candela)",
+          "name": "gemini-3.5-flash",
+          "display_name": "Gemini 3.5 Flash (via Candela)",
           "max_tokens": 8192
         },
         {
@@ -37,7 +37,7 @@ Edit your Zed settings (`~/.config/zed/settings.json` or `Cmd+,`):
   "assistant": {
     "default_model": {
       "provider": "openai",
-      "model": "gemini-2.5-pro"
+      "model": "gemini-3.5-pro"
     }
   }
 }
