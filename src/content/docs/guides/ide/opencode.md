@@ -133,4 +133,3 @@ You can adjust plugin options in your `.opencode.json` configuration file:
   }
 }
 ```
-
