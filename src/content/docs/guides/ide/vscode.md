@@ -78,4 +78,4 @@ Total available: $12.00
 Invalidates the client cache (which has a 30s TTL by default) and forces an immediate reload of the usage telemetry.
 
 ### `Candela: Open Web Dashboard`
-Launches your default browser pointing to the local dashboard UI (usually `http://localhost:3000`).
+Launches your default browser pointing to the local dashboard UI (usually `http://localhost:8181/_local/`).

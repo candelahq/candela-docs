@@ -102,17 +102,21 @@ These metrics appear in:
 
 ## Gemini Cache Discount
 
-For Google Gemini models, cached content is priced at a discount from the standard input rate. Configure the discount factor:
+For Google Gemini models, cached content is priced at a discount from the standard input rate. Candela automatically resolves model-aware cache discount rates:
+* **Gemini 2.5+ and 3.x/3.5 models:** Automatically receive a **90% discount (0.10×)**.
+* **Gemini 2.0 and older models:** Receive a **75% discount (0.25×)**.
+
+To override these defaults and configure a custom fallback discount factor (e.g., 75% discount):
 
 ```bash
-# Set Gemini cache discount (0.0 = free, 1.0 = no discount)
+# Set custom fallback Gemini cache discount (0.0 = free, 1.0 = no discount)
 curl -X POST http://localhost:8181/_local/api/config \
   -H "Content-Type: application/json" \
   -d '{"gemini_cache_discount": 0.25}'
 ```
 
 <Aside type="note">
-The `gemini_cache_discount` value must be between `0.0` and `1.0`. Invalid values return a `400 Bad Request` response. The default is `0.25` (75% discount on cached tokens), matching Google's current Gemini pricing.
+The `gemini_cache_discount` value must be between `0.0` and `1.0`. Invalid values return a `400 Bad Request` response.
 </Aside>
 
 The current discount value is reflected in the `GET /_local/api/config` response, so clients can display the active configuration.

@@ -15,7 +15,7 @@ Edit your OpenCode config (`~/.config/opencode/config.json` or project-level `.o
     "name": "openai",
     "apiBase": "http://localhost:1234/v1",
     "apiKey": "candela",
-    "model": "gemini-2.5-pro"
+    "model": "gemini-3.5-pro"
   }
 }
 ```
@@ -30,7 +30,7 @@ For cloud models routed through candela in Solo + Cloud mode:
     "name": "openai",
     "apiBase": "http://localhost:1234/v1",
     "apiKey": "candela",
-    "model": "gemini-2.5-pro"
+    "model": "gemini-3.5-pro"
   }
 }
 ```
@@ -80,7 +80,17 @@ For native integration with the terminal-based OpenCode assistant, you can insta
 
 ### Installation
 
-Enable the plugin in your project's local `.opencode.json` configuration or globally in `~/.config/opencode/config.json`:
+To register the plugin, choose one of the following methods depending on your workflow:
+
+#### Option 1: Local Project Registration (Recommended)
+
+Install the plugin in your project workspace:
+
+```bash
+npm install --save-dev opencode-candela
+```
+
+Then, enable it in your local `.opencode.json` configuration:
 
 ```json
 {
@@ -90,16 +100,23 @@ Enable the plugin in your project's local `.opencode.json` configuration or glob
 }
 ```
 
-Or install it inside your project workspace:
+#### Option 2: Global Configuration Registration
+
+If you want the plugin to be active globally across multiple projects, you can copy the source files to your global OpenCode config:
 
 ```bash
-npm install --save-dev opencode-candela
+mkdir -p ~/.config/opencode/plugins/opencode-candela
+cp -r node_modules/opencode-candela/src/* ~/.config/opencode/plugins/opencode-candela/
 ```
 
-And link/register the plugin path (using a symlink ensures it stays up-to-date automatically):
-```bash
-mkdir -p ~/.config/opencode/plugins
-ln -s "$(pwd)/node_modules/opencode-candela/src" ~/.config/opencode/plugins/opencode-candela
+Then, add it to your global `~/.config/opencode/config.json`:
+
+```json
+{
+  "plugins": [
+    "opencode-candela"
+  ]
+}
 ```
 
 ### Configuration Options
@@ -116,4 +133,3 @@ You can adjust plugin options in your `.opencode.json` configuration file:
   }
 }
 ```
-

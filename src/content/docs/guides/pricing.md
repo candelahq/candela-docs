@@ -29,7 +29,7 @@ Any model available in your Vertex AI Model Garden or via direct API is supporte
 
 | Provider | Key Models | Auth |
 |----------|-----------|------|
-| **Google Gemini** | Gemini 2.5 Pro, Gemini 2.5 Flash, Gemini 2.0 Flash | ADC (Vertex AI) |
+| **Google Gemini** | Gemini 3.5 Pro/Flash, Gemini 3.1 Pro/Flash, Gemini 2.5 Pro/Flash, Gemini 2.0 Flash | ADC (Vertex AI) |
 | **Anthropic** | Claude Sonnet, Claude Opus, Claude Haiku | ADC (Vertex AI) |
 | **OpenAI** | GPT-4o, o3, o1 | API key |
 | **Local** | Llama, Qwen, Mistral, DeepSeek — anything in Ollama | Free ($0.00) |
@@ -50,9 +50,9 @@ pricing:
   # Per-model overrides (takes priority over built-in defaults)
   models:
     - provider: google
-      model: gemini-2.5-pro
-      input_per_million: 1.00     # negotiated rate
-      output_per_million: 8.00
+      model: gemini-3.5-flash
+      input_per_million: 0.40     # negotiated rate (list: $0.50)
+      output_per_million: 2.40    # negotiated rate (list: $3.00)
       discount_percent: 0.0       # no additional discount
 
     - provider: openai
@@ -105,7 +105,7 @@ When LLMs use [prompt caching](https://docs.anthropic.com/en/docs/build-with-cla
 | Provider | Cache Read | Cache Write | Source |
 |----------|-----------|-------------|--------|
 | **Anthropic** | 90% off (0.1×) | 25% surcharge (1.25×) | [Anthropic pricing](https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching#pricing) |
-| **Google Gemini 2.5+/3.x** | 90% off (0.1×) | No surcharge | [Vertex AI pricing](https://cloud.google.com/vertex-ai/generative-ai/pricing) |
+| **Google Gemini 2.5+/3.x/3.5** | 90% off (0.1×) | No surcharge | [Vertex AI pricing](https://cloud.google.com/vertex-ai/generative-ai/pricing) |
 | **Google Gemini 2.0** | 75% off (0.25×) | No surcharge | Vertex AI pricing |
 | **OpenAI** | 50% off (0.5×) | No surcharge | [OpenAI pricing](https://openai.com/api/pricing/) |
 
