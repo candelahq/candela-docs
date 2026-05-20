@@ -1,6 +1,6 @@
 ---
 title: Prompt Caching
-description: Configure Anthropic prompt caching and Gemini cache discounts for optimized LLM costs.
+description: Configure Anthropic prompt caching and Gemini cache price multipliers for optimized LLM costs.
 ---
 
 import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
@@ -100,22 +100,22 @@ These metrics appear in:
 - **Trace detail** — per-request cache breakdown
 - **Models view** — per-model cache hit rates
 
-## Gemini Cache Discount
+## Gemini Cache Price Multiplier
 
-For Google Gemini models, cached content is priced at a discount from the standard input rate. Configure the discount factor:
+For Google Gemini models, cached content is priced as a fraction of the standard input rate. Configure the price multiplier:
 
 ```bash
-# Set Gemini cache discount (0.0 = free, 1.0 = no discount)
+# Set Gemini cache price multiplier (0.25 = cached tokens cost 25% of base price)
 curl -X POST http://localhost:8181/_local/api/config \
   -H "Content-Type: application/json" \
   -d '{"gemini_cache_discount": 0.25}'
 ```
 
 <Aside type="note">
-The `gemini_cache_discount` value must be between `0.0` and `1.0`. Invalid values return a `400 Bad Request` response. The default is `0.25` (75% discount on cached tokens), matching Google's current Gemini pricing.
+The `gemini_cache_discount` value is a **price multiplier** between `0.0` and `1.0`. A value of `0.25` means cached tokens are charged at **25% of the base input price** (i.e., a 75% cost reduction). Invalid values return a `400 Bad Request` response. The default `0.25` matches Google's current Gemini pricing.
 </Aside>
 
-The current discount value is reflected in the `GET /_local/api/config` response, so clients can display the active configuration.
+The current multiplier is reflected in the `GET /_local/api/config` response, so clients can display the active configuration.
 
 ## Troubleshooting
 

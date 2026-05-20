@@ -44,7 +44,7 @@ Returns `200 OK` with `{"status": "ok"}`.
 | `POST /_local/api/pull` | Pull a model from Ollama |
 | `POST /_local/api/start` | Start the runtime backend |
 | `POST /_local/api/stop` | Stop the runtime backend |
-| `GET /_local/api/config` | Runtime configuration (cache TTL, Gemini cache discount) |
+| `GET /_local/api/config` | Runtime configuration (cache TTL, Gemini cache price multiplier) |
 | `POST /_local/api/config` | Update runtime configuration |
 
 ### Example: Query Traces
