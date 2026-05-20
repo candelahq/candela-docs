@@ -68,3 +68,40 @@ gcloud run services update candela --project $PROJECT --region $REGION \
 # Apply infrastructure
 cd terraform && terraform apply
 ```
+
+## Kubernetes + eBPF Enforcement
+
+For on-prem or multi-cloud Kubernetes deployments, Candela supports kernel-level enforcement via the eBPF stack:
+
+```
+┌──────────────────────────────────────────────────────────┐
+│  Kubernetes Cluster (Cilium CNI)                         │
+│                                                          │
+│  ┌─────────────────────┐    ┌─────────────────────────┐  │
+│  │ Application Pod     │    │ Candela Sidecar Pod     │  │
+│  │                     │    │                         │  │
+│  │  iptables redirect ─┼────▶ candela-sidecar :15001  │  │
+│  │  (TPROXY)           │    │   ↕ proxy + trace       │  │
+│  └─────────────────────┘    └────────┬────────────────┘  │
+│                                      │                   │
+│  ┌─────────────────────┐             │                   │
+│  │ Tetragon            │             │                   │
+│  │  TracingPolicy:     │             │                   │
+│  │  detect bypass      │             │                   │
+│  └─────────────────────┘             │                   │
+│                                      │                   │
+│  ┌─────────────────────┐             │                   │
+│  │ Cilium              │             ▼                   │
+│  │  FQDNNetworkPolicy: │      ┌──────────────┐          │
+│  │  block direct LLM   │      │ LLM Provider │          │
+│  └─────────────────────┘      └──────────────┘          │
+└──────────────────────────────────────────────────────────┘
+```
+
+| Component | Purpose |
+|---|---|
+| **iptables TPROXY** | Transparently redirect outbound LLM traffic to the sidecar proxy |
+| **Cilium FQDNNetworkPolicy** | Block direct egress to LLM provider domains — force proxy path |
+| **Tetragon TracingPolicy** | Detect and alert on any bypass attempts at the kernel level |
+
+All enforcement resources are generated from `candela-policy.yaml` via Helm. See [eBPF Enforcement](/governance/ebpf-enforcement/) for the full implementation guide.

@@ -38,6 +38,8 @@ Response:
 | Circuit breaker trips | `"circuit breaker tripped"` | Any |
 | Budget thresholds | `"🔔 budget alert"` | At 80%, 90%, 100% |
 | Span buffer full | `"span processor buffer full"` | Any |
+| Tetragon audit stream | `"tetragon audit stream"` | Disconnected |
+| gRPC audit sink errors | `"audit sink write failed"` | Any |
 
 ### Log-Based Alerts
 
@@ -160,6 +162,14 @@ ORDER BY total_cost DESC
 2. Look for `"circuit breaker tripped"` logs
 3. Check ADC token refresh: `"failed to get ADC token"`
 4. Verify `vertex_ai.project_id` and region in config
+
+### Tetragon Audit Pipeline
+
+1. Verify Tetragon is running: `kubectl get pods -n kube-system -l app.kubernetes.io/name=tetragon`
+2. Check gRPC audit stream connection: search logs for `"tetragon audit stream"`
+3. Inspect `MultiSink` routing: each audit event should fan out to all configured sinks
+4. If events are missing, check `CloseSend()` / graceful shutdown logs for premature stream termination
+5. Verify `TracingPolicy` is applied: `kubectl get tracingpolicies`
 
 ---
 

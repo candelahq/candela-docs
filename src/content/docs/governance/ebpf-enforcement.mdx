@@ -176,7 +176,8 @@ The `TracingPolicy` hooks into `tcp_connect` and filters by destination port (44
 | 3 | Helm chart with enforcement templates | <Badge text="Shipped" variant="success" /> |
 | 4 | Transparent listener (Go — SNI routing) | <Badge text="Shipped" variant="success" /> |
 | 5 | Transparent listener (Rust — `rustls`) | <Badge text="In Progress" variant="caution" /> |
-| 6 | Tetragon + Hubble observability integration | <Badge text="Planned" variant="default" /> |
+| 6 | Tetragon + Hubble observability integration | <Badge text="Shipped" variant="success" /> |
+| 6a | Tetragon gRPC audit hardening (`CloseSend`, `MultiSink`, graceful shutdown) | <Badge text="Shipped" variant="success" /> |
 
 <Aside type="note">
 eBPF enforcement requires a Kubernetes environment with Cilium and Tetragon. It is designed for enterprise container deployments — local development and solo mode are unaffected.
