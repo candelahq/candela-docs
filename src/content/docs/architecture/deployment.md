@@ -104,4 +104,4 @@ For on-prem or multi-cloud Kubernetes deployments, Candela supports kernel-level
 | **Cilium FQDNNetworkPolicy** | Block direct egress to LLM provider domains — force proxy path |
 | **Tetragon TracingPolicy** | Detect and alert on any bypass attempts at the kernel level |
 
-All enforcement resources are generated from `candela-policy.yaml` via Helm. See [eBPF Enforcement](/governance/ebpf-enforcement/) for the full implementation guide.
+All enforcement resources are generated from `candela-policy.yaml` via Helm. See [eBPF Enforcement](/governance/ebpf-enforcement) for the full implementation guide.

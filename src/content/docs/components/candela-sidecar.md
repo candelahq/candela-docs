@@ -125,4 +125,4 @@ curl http://localhost:8080/healthz
 
 - [ADK Integration](/guides/adk-integration/) — Route ADK agents through the sidecar
 - [Architecture](/architecture/storage/) — Storage backend details
-- [eBPF Enforcement](/governance/ebpf-enforcement/) — Transparent proxy mode with iptables redirect, Tetragon, and Cilium
+- [eBPF Enforcement](/governance/ebpf-enforcement) — Transparent proxy mode with iptables redirect, Tetragon, and Cilium
