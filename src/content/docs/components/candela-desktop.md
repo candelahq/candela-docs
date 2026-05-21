@@ -120,7 +120,8 @@ buf generate   # requires buf + BUF_TOKEN
 ### Authentication
 
 Desktop uses `CandelaAuthService` for native Application Default Credentials (ADC) authentication:
-- Reads credentials directly from `~/.config/gcloud/application_default_credentials.json`
+- Reads credentials directly from `~/.config/gcloud/application_default_credentials.json` (macOS/Linux)
+- Windows ADC support is welcome (see [#82](https://github.com/candelahq/candela-desktop/issues/82)) — the expected path is `%APPDATA%\gcloud\application_default_credentials.json`
 - Refreshes access tokens against `oauth2.googleapis.com`
 - No dependency on the `gcloud` CLI
 
