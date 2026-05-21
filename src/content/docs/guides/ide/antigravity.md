@@ -7,7 +7,7 @@ description: Observability options for Google's Antigravity coding agent with Ca
 
 ## Architecture
 
-Unlike tools such as [Claude Code](/guides/ide/claude-code/) or [OpenCode](/guides/ide/opencode/) that make **direct API calls** to LLM providers, Antigravity uses a managed backend:
+Unlike tools such as [Claude Code](/guides/ide/claude-code) or [OpenCode](/guides/ide/opencode) that make **direct API calls** to LLM providers, Antigravity uses a managed backend:
 
 ```
 ┌─────────┐     TLS      ┌─────────────────────────┐    internal    ┌───────────────┐
@@ -28,7 +28,7 @@ Setting `HTTPS_PROXY` to route through Candela will break the OAuth authenticati
 
 ### Transparent Proxy (Linux / Kubernetes only)
 
-In Linux environments with [eBPF enforcement](/governance/ebpf-enforcement/) or iptables rules, Candela's transparent proxy can intercept connections to `*-aiplatform.googleapis.com` via SNI matching. This captures Vertex AI traffic from **any** tool — including workloads where `agy` triggers downstream Vertex AI calls.
+In Linux environments with [eBPF enforcement](/governance/ebpf-enforcement) or iptables rules, Candela's transparent proxy can intercept connections to `*-aiplatform.googleapis.com` via SNI matching. This captures Vertex AI traffic from **any** tool — including workloads where `agy` triggers downstream Vertex AI calls.
 
 However, `agy`'s primary traffic flows to `cloudcode-pa.googleapis.com` (not directly to `aiplatform.googleapis.com`), so the transparent proxy will not intercept the CLI's own requests.
 
@@ -108,7 +108,7 @@ Model inference is routed through the Cloud Code backend to Vertex AI using the 
 | Direct LLM API calls | ✅ Client → API | ✅ Client → API | ❌ Client → Cloud Code → Vertex AI |
 | Candela proxy routing | ✅ Full support | ✅ Full support | ❌ Not supported |
 | Transparent proxy (eBPF) | ✅ Intercepts `api.anthropic.com` | ✅ Intercepts provider APIs | ⚠️ Partial — only downstream Vertex AI calls |
-| MCP server support | ❌ | ✅ Plugins | ✅ Native MCP support |
+| MCP server support | ✅ Native support | ✅ Plugins | ✅ Native MCP support |
 | Cost tracking | Via Candela | Via Candela | Via Google Cloud billing |
 
 ## Troubleshooting
