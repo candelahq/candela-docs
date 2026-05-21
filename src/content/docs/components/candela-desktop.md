@@ -89,6 +89,51 @@ The trace viewer displays a waterfall view of distributed traces:
 - **Cost** — Estimated cost based on provider pricing
 - **Attributes** — Full span attributes including model, provider, and custom metadata
 
+## Architecture
+
+### State Management
+
+Candela Desktop uses [Riverpod 3.x](https://riverpod.dev) with `@riverpod` code generation for all state management. The provider hierarchy flows from configuration → services → controllers:
+
+| Layer | Examples | Role |
+|-------|----------|------|
+| **Config Providers** | `candelaHostProvider`, `configProvider` | Environment and user settings |
+| **Service Providers** | `connectApiServiceProvider`, `cliServiceProvider` | RPC clients and system integration |
+| **State Controllers** | `DashboardController`, `TracesNotifier` | Async state that drives the UI |
+
+**`DashboardController`** is the central state controller — a class-based `@riverpod` Notifier that provides:
+- **Reactive polling** — auto-rebuilds when upstream providers change
+- **Immutable state snapshots** — all updates use `state.copyWith()`
+- **Disposal guards** — prevents state mutation after `ref.onDispose()`
+- **Imperative bridge** — `onStateChanged()` callback for non-widget consumers (e.g., system tray)
+
+All UI screens consume state via `ref.watch(dashboardControllerProvider)` — no `ListenableBuilder` or manual listeners.
+
+### RPC Layer
+
+Desktop communicates with the `candela` proxy via [ConnectRPC](https://connectrpc.com). Dart stubs are generated from protobuf definitions hosted on the Buf Schema Registry (BSR):
+
+```bash
+buf generate   # requires buf + BUF_TOKEN
+```
+
+### Authentication
+
+Desktop uses `CandelaAuthService` for native Application Default Credentials (ADC) authentication:
+- Reads credentials directly from `~/.config/gcloud/application_default_credentials.json`
+- Refreshes access tokens against `oauth2.googleapis.com`
+- No dependency on the `gcloud` CLI
+
+### Testing
+
+```bash
+flutter test                     # ~855 unit + widget tests
+flutter test integration_test/   # E2E (requires macOS runner)
+flutter analyze                  # static analysis + lint
+```
+
+The integration test suite covers app boot, dashboard empty state, onboarding flow, navigation, and settings.
+
 ## Upgrade
 
 ```bash
