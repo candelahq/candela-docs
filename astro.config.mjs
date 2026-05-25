@@ -92,7 +92,6 @@ export default defineConfig({
 								{ label: 'Cline / Continue', slug: 'guides/ide/cline' },
 								{ label: 'JetBrains AI', slug: 'guides/ide/jetbrains' },
 								{ label: 'Claude Code', slug: 'guides/ide/claude-code' },
-								{ label: 'Antigravity CLI', slug: 'guides/ide/antigravity' },
 								{ label: 'Cursor / Windsurf', slug: 'guides/ide/cursor' },
 							],
 						},
