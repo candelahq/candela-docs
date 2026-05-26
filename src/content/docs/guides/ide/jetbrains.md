@@ -63,3 +63,15 @@ If you run multiple JetBrains IDEs simultaneously (e.g., GoLand + WebStorm), the
 :::tip[Port 1234 is intentional]
 candela uses `:1234` specifically because it's the standard LM Studio port. Most JetBrains AI features are already configured to look there — no changes needed.
 :::
+
+---
+
+## Official JetBrains Plugin (Coming Soon)
+
+A dedicated Candela JetBrains plugin — similar to the [VS Code extension](https://open-vsx.org/extension/candelahq/candela-vscode) — is planned for an upcoming release. It will provide:
+
+* **Status bar cost tracker** with live token counts and spend
+* **Budget warnings** with grant waterfall display
+* **Quick actions** to open the dashboard and check budget
+
+In the meantime, all JetBrains IDEs work with Candela's proxy — just configure your AI tool's base URL to point at `http://localhost:8181`.

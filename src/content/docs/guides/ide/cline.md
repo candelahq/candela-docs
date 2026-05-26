@@ -84,7 +84,7 @@ For deeper integration, install the official `candela-cline` plugin package. Thi
 
 ### Installation
 
-Install the package in your project's development dependencies:
+Install from [npm](https://www.npmjs.com/package/candela-cline):
 
 ```bash
 npm install --save-dev candela-cline

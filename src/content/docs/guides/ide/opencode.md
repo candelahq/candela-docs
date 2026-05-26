@@ -87,8 +87,10 @@ To register the plugin, choose one of the following methods depending on your wo
 Install the plugin in your project workspace:
 
 ```bash
-npm install --save-dev opencode-candela
+npm install opencode-candela
 ```
+
+[➡️ View on npm](https://www.npmjs.com/package/opencode-candela)
 
 Then, enable it in your local `.opencode.json` configuration:
 

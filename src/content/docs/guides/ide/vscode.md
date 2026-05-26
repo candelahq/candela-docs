@@ -37,10 +37,27 @@ The official **Candela VS Code Extension** (`candela-vscode`) provides real-time
 
 ## Installation
 
-1. Open VS Code.
-2. Go to **Extensions** (`Cmd+Shift+X` or `Ctrl+Shift+X`).
-3. Search for **Candela**.
-4. Click **Install**.
+### From Open VSX (Recommended)
+
+1. Open VS Code Extensions panel (`Cmd+Shift+X`).
+2. Search for **"Candela"**.
+3. Click **Install**.
+
+Or install from the command line:
+
+```bash
+code --install-extension candelahq.candela-vscode
+```
+
+[➡️ View on Open VSX](https://open-vsx.org/extension/candelahq/candela-vscode)
+
+### From GitHub Releases
+
+Download the `.vsix` from [GitHub Releases](https://github.com/candelahq/candela-vscode/releases) and install:
+
+```bash
+code --install-extension candela-vscode-*.vsix
+```
 
 ---
 
