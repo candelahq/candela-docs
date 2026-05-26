@@ -119,6 +119,25 @@ IDE → candela (:1234)
                          Auth Middleware (Strategy 2 or 3)
 ```
 
+#### Strategy 1.5: SA Impersonation for IAP ID Tokens
+
+When `iap_service_account` is set in the config, `candela` uses the developer's ADC to **impersonate** a designated service account and mint an IAP-scoped OIDC ID token:
+
+```
+User ADC → impersonate SA → generateIdToken(audience) → IAP ID token
+```
+
+This uses a custom **`iapIdTokenCreator`** IAM role bound to the service account, which grants only:
+
+| Permission | Included |
+|------------|:--------:|
+| `iam.serviceAccounts.getOpenIdToken` | ✅ |
+| `iam.serviceAccounts.getAccessToken` | ❌ |
+
+:::note[Why not `getAccessToken`?]
+Granting `getAccessToken` would let developers impersonate the SA to call any GCP API — including direct LLM API access that bypasses the Candela proxy and its budget enforcement. By only granting `getOpenIdToken`, developers can authenticate through IAP but **cannot** bypass the proxy for direct LLM API access.
+:::
+
 ---
 
 ## Input Validation

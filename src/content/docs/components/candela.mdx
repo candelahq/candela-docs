@@ -97,6 +97,7 @@ runtime_backend: ollama
 
 remote: https://candela-xxx.a.run.app
 audience: "12345678.apps.googleusercontent.com"
+iap_service_account: candela-server@project.iam.gserviceaccount.com
 ```
 
 **What you get**: Everything from Solo Mode, plus cloud models routed through the Candela server with automatic OIDC auth injection via ADC, team-wide cost tracking, and optional budget enforcement.
@@ -150,6 +151,7 @@ vertex_ai:
 # ── Optional: Team Mode (omit for Solo) ──
 remote: https://candela-xxx.run.app # Candela server URL
 audience: "12345678.apps..."        # IAP audience for OIDC auth
+iap_service_account: sa@proj.iam.gserviceaccount.com  # SA to impersonate for IAP ID tokens
 
 # ── Optional: Advanced ──
 local_upstream: http://localhost:11434  # explicit local runtime URL

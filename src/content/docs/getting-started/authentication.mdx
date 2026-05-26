@@ -122,6 +122,31 @@ This writes the same ADC file that Candela reads. However, `candela auth login` 
 - Works identically on all platforms
 - The Desktop app can refresh tokens without shelling out
 
+## Team Mode: IAP Authentication
+
+When your team runs a Candela server behind [Identity-Aware Proxy (IAP)](https://cloud.google.com/iap), `candela` needs an OIDC ID token scoped to the IAP audience. The `iap_service_account` config field enables this by impersonating a designated service account to mint the token:
+
+```yaml
+# ~/.config/candela/config.yaml — Team Mode with IAP
+port: 8181
+lm_studio_port: 1234
+runtime_backend: ollama
+
+remote: https://candela-xxx.a.run.app
+audience: "12345678.apps.googleusercontent.com"
+iap_service_account: candela-server@project.iam.gserviceaccount.com
+```
+
+**How it works**:
+1. Developer runs `candela auth login --provider gcp` to obtain user ADC
+2. On each cloud-model request, `candela` uses the user's ADC to impersonate `iap_service_account`
+3. The impersonation call mints an OIDC ID token with the configured `audience`
+4. The ID token is sent as `Authorization: Bearer <token>` to the Candela server
+
+<Aside type="important">
+The service account must have a custom **`iapIdTokenCreator`** IAM role that grants only `iam.serviceAccounts.getOpenIdToken` — **not** `getAccessToken`. This ensures developers can authenticate through IAP but cannot impersonate the SA for direct LLM API access, which would bypass proxy budget enforcement. See [Security — SA Impersonation](/architecture/security/#strategy-15-sa-impersonation-for-iap-id-tokens) for details.
+</Aside>
+
 ## Troubleshooting
 
 | Symptom | Cause | Fix |
