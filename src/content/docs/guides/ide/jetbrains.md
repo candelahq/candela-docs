@@ -79,12 +79,18 @@ The [`candela-jetbrains`](https://github.com/candelahq/candela-jetbrains) plugin
 
 ### Installation
 
-#### From GitHub Releases
+#### From GitHub Releases (recommended)
 
-1. Download the `.zip` from [GitHub Releases](https://github.com/candelahq/candela-jetbrains/releases)
-2. In your IDE: **Settings → Plugins → ⚙️ → Install Plugin from Disk…**
-3. Select the downloaded `.zip` file
-4. Restart the IDE
+1. Go to the [latest release](https://github.com/candelahq/candela-jetbrains/releases/latest)
+2. Download **`candela-jetbrains-x.x.x.zip`** (not the source code archives)
+3. In your IDE, open **Settings → Plugins**
+4. Click the **⚙️ gear icon** → **Install Plugin from Disk…**
+5. Select the downloaded `.zip` file
+6. Click **OK** and **Restart IDE**
+
+:::note[JetBrains Marketplace]
+The plugin is pending review on the JetBrains Marketplace. Once approved, you'll be able to install directly from **Settings → Plugins → Marketplace** by searching for "Candela".
+:::
 
 #### Build from Source
 
@@ -92,8 +98,11 @@ The [`candela-jetbrains`](https://github.com/candelahq/candela-jetbrains) plugin
 git clone https://github.com/candelahq/candela-jetbrains.git
 cd candela-jetbrains
 nix develop -c ./gradlew buildPlugin
-# Output: build/distributions/candela-jetbrains-0.1.0.zip
+# Output: build/distributions/candela-jetbrains-*.zip
 ```
+
+Then install the `.zip` from disk using steps 3–6 above.
+
 
 ### Settings
 
