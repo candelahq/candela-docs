@@ -90,7 +90,7 @@ export default defineConfig({
 								{ label: 'OpenCode', slug: 'guides/ide/opencode' },
 								{ label: 'Zed', slug: 'guides/ide/zed' },
 								{ label: 'Cline / Continue', slug: 'guides/ide/cline' },
-								{ label: 'JetBrains AI', slug: 'guides/ide/jetbrains' },
+								{ label: 'JetBrains', slug: 'guides/ide/jetbrains', badge: { text: 'New', variant: 'success' } },
 								{ label: 'Claude Code', slug: 'guides/ide/claude-code' },
 								{ label: 'Cursor / Windsurf', slug: 'guides/ide/cursor' },
 							],

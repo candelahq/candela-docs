@@ -64,14 +64,71 @@ If you run multiple JetBrains IDEs simultaneously (e.g., GoLand + WebStorm), the
 candela uses `:1234` specifically because it's the standard LM Studio port. Most JetBrains AI features are already configured to look there — no changes needed.
 :::
 
----
+## Official Candela JetBrains Plugin
 
-## Official JetBrains Plugin (Coming Soon)
+The [`candela-jetbrains`](https://github.com/candelahq/candela-jetbrains) plugin adds real-time cost visibility and budget controls directly inside your JetBrains IDE — no terminal switching required.
 
-A dedicated Candela JetBrains plugin — similar to the [VS Code extension](https://open-vsx.org/extension/candelahq/candela-vscode) — is planned for an upcoming release. It will provide:
+### Features
 
-* **Status bar cost tracker** with live token counts and spend
-* **Budget warnings** with grant waterfall display
-* **Quick actions** to open the dashboard and check budget
+* **Status bar cost tracker** — live `🔥 1.2M · $2.45 · 🟢45%` in the bottom bar, auto-refreshing every 60s
+* **Rich hover tooltips** — input/output token splits, request counts, model-by-model breakdown, grant details
+* **Budget warning balloons** — notifications when usage crosses your threshold (default 80%), red alerts when exhausted
+* **Grant display** — active bonus grants with remaining amounts and expiry countdowns
+* **Offline backoff** — shows `🕯️ offline` when Candela isn't running, backs off to 5-minute polling to avoid noise
+* **Startup health check** — brief notification on project open confirming connection
 
-In the meantime, all JetBrains IDEs work with Candela's proxy — just configure your AI tool's base URL to point at `http://localhost:8181`.
+### Installation
+
+#### From GitHub Releases
+
+1. Download the `.zip` from [GitHub Releases](https://github.com/candelahq/candela-jetbrains/releases)
+2. In your IDE: **Settings → Plugins → ⚙️ → Install Plugin from Disk…**
+3. Select the downloaded `.zip` file
+4. Restart the IDE
+
+#### Build from Source
+
+```bash
+git clone https://github.com/candelahq/candela-jetbrains.git
+cd candela-jetbrains
+nix develop -c ./gradlew buildPlugin
+# Output: build/distributions/candela-jetbrains-0.1.0.zip
+```
+
+### Settings
+
+Configure under **Settings → Tools → Candela**:
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| Server URL | `http://localhost:8181` | Candela server URL |
+| Status bar enabled | `true` | Show cost tracker in status bar |
+| Refresh interval | `60s` | Auto-refresh interval (0 to disable) |
+| Budget warning threshold | `80%` | Warning percentage threshold |
+
+### Menu Actions
+
+Access from **Tools → Candela** or via the command palette:
+
+| Action | Description |
+|--------|-------------|
+| **Show Cost Summary** | Detailed token/cost breakdown with model-by-model stats |
+| **Check Budget** | Budget meter with remaining balance and active grants |
+| **Open Dashboard** | Launch the Candela web dashboard in your browser |
+| **Refresh Status** | Force refresh status bar data |
+
+### Development
+
+```bash
+# Enter dev shell (JDK 21 + Gradle + Kotlin)
+nix develop
+
+# Run sandboxed IDE with plugin loaded
+nix develop -c ./gradlew runIde
+
+# Build distribution
+nix develop -c ./gradlew buildPlugin
+
+# Run tests
+nix develop -c ./gradlew test
+```
