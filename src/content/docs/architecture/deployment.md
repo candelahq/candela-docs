@@ -13,7 +13,8 @@ Developer Machine   │  OpenCode / Zed     │
                     │  candela            │
                     │  (:8181 / :1234)    │
                     └────────┬────────────┘
-                             │ Bearer token (OIDC via ADC)
+                             │ Proxy-Authorization: OIDC (IAP)
+                             │ X-Candela-Auth: OAuth2 (user identity)
                              ▼
                     ┌─────────────────────┐
 Google Cloud        │  Cloud Run          │
