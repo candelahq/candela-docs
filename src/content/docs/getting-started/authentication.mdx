@@ -146,7 +146,7 @@ iap_service_account: candela-server@project.iam.gserviceaccount.com
 4. The Candela server reads `X-Candela-Auth` **first** to identify the developer (calls Google's userinfo endpoint)
 5. If `X-Candela-Auth` is absent, it falls back to the `Authorization` header strategies
 
-<Aside type="important">
+<Aside type="note">
 The service account must have a custom **`iapIdTokenCreator`** IAM role that grants only `iam.serviceAccounts.getOpenIdToken` — **not** `getAccessToken`. This ensures developers can authenticate through IAP but cannot impersonate the SA for direct LLM API access, which would bypass proxy budget enforcement. See [Security — SA Impersonation](/architecture/security/#strategy-15-dual-token-for-iap-user-adc--iap_service_account) for details.
 </Aside>
 
