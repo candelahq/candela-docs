@@ -13,10 +13,14 @@ flowchart TD
     SKIP -->|yes| PASS[Pass through]
     SKIP -->|no| DEV{Dev Mode?}
     DEV -->|yes| SYNTH["Inject synthetic admin<br/>(admin@localhost)"]
-    DEV -->|no| TOK{Has Bearer Token?}
-    TOK -->|no| DENY["401 Unauthorized"]
+    DEV -->|no| XCA{Has X-Candela-Auth?}
+    XCA -->|yes| S3X["Strategy 3:<br/>OAuth2 Access Token<br/>(from X-Candela-Auth)"]
+    S3X -->|valid| AUTH[Authenticated ✓]
+    S3X -->|invalid| DENY["401 Unauthorized"]
+    XCA -->|no| TOK{Has Bearer Token?}
+    TOK -->|no| DENY
     TOK -->|yes| S1["Strategy 1:<br/>Firebase ID Token"]
-    S1 -->|valid| AUTH[Authenticated ✓]
+    S1 -->|valid| AUTH
     S1 -->|invalid| S2["Strategy 2:<br/>Google ID Token"]
     S2 -->|valid| AUTH
     S2 -->|invalid| S3["Strategy 3:<br/>OAuth2 Access Token"]
@@ -26,16 +30,17 @@ flowchart TD
     CTX --> HANDLER[ConnectRPC Handler]
 ```
 
-The middleware tries three strategies in sequence — the first successful validation wins:
+The middleware checks `X-Candela-Auth` first (sent by `candela` behind IAP). If absent, it falls back to three strategies on the `Authorization` header — the first successful validation wins:
 
 | # | Strategy | Client | Token Source |
 |---|----------|--------|-------------|
+| — | **`X-Candela-Auth` (priority)** | `candela` behind IAP | User's ADC OAuth2 access token |
 | 1 | **Firebase ID Token** | Browser UI | Firebase JS SDK |
-| 2 | **Google ID Token** | Service accounts, `candela` CLI | `idtoken.NewTokenSource(audience)` |
-| 3 | **OAuth2 Access Token** | `candela` with user ADC | `candela auth login` (or `gcloud auth application-default login`) |
+| 2 | **Google ID Token** | Service accounts, `candela` CLI (no IAP) | `idtoken.NewTokenSource(audience)` |
+| 3 | **OAuth2 Access Token** | `candela` with user ADC (no IAP) | `candela auth login` (or `gcloud auth application-default login`) |
 
 :::note
-Strategy 3 calls Google's userinfo endpoint, adding ~50ms latency. This is the only way to validate user-scoped ADC that `candela` uses with `candela auth login` (or `gcloud auth application-default login`).
+Behind IAP, the `Authorization` header is replaced by IAP's own JWT. `X-Candela-Auth` preserves the user's real identity so the server can identify the developer. Strategy 3 calls Google's userinfo endpoint, adding ~50ms latency.
 :::
 
 ---
@@ -105,26 +110,53 @@ AND (? = '' OR user_id = ?)
 |------|:------------:|-----|
 | **Solo** | No | All requests to `:1234` and `:8181` are unauthenticated |
 | **Solo + Cloud** | ADC only | `candela auth login` — tokens used for upstream Vertex AI calls |
-| **Team** | OIDC | `candela` injects Google ID tokens into requests to the Candela server |
+| **Team (no IAP)** | OIDC | `candela` injects a Google ID token as `Authorization: Bearer` |
+| **Team (IAP)** | Dual-token | `candela` sends IAP OIDC + user identity via `X-Candela-Auth` |
 
-### Team Mode Token Flow
+### Team Mode Token Flows
+
+#### Strategy 1: SA Credentials (No IAP)
+
+When `candela` authenticates with SA credentials (e.g., Workload Identity, SA key), it mints a single OIDC ID token:
+
+```
+SA Credential → idtoken.NewTokenSource(audience) → single ID token
+                 └── Authorization: Bearer <oidc-id-token>
+```
+
+The server validates this via Strategy 2 (Google ID Token).
+
+#### Strategy 1.5: Dual-Token for IAP (User ADC + `iap_service_account`)
+
+When `iap_service_account` is set in the config and the developer has user ADC, `candela` sends **two tokens** on every cloud-model request:
 
 ```
 IDE → candela (:1234)
          │
          ├── Local model → Ollama (no auth)
-         └── Cloud model → Candela Server (Cloud Run)
-                              │ Authorization: Bearer <google-id-token>
+         └── Cloud model → Candela Server (behind IAP)
+                              │
+                              │  Proxy-Authorization: Bearer <impersonated-sa-oidc-token>
+                              │  X-Candela-Auth: Bearer <user-adc-oauth2-access-token>
+                              │
                               ▼
-                         Auth Middleware (Strategy 2 or 3)
+                         IAP (validates Proxy-Authorization)
+                              │ ← IAP replaces Authorization with its own JWT
+                              ▼
+                         Auth Middleware (reads X-Candela-Auth for user identity)
 ```
 
-#### Strategy 1.5: SA Impersonation for IAP ID Tokens
+**Token breakdown**:
 
-When `iap_service_account` is set in the config, `candela` uses the developer's ADC to **impersonate** a designated service account and mint an IAP-scoped OIDC ID token:
+| Header | Value | Purpose |
+|--------|-------|----------|
+| `Proxy-Authorization` | Impersonated SA OIDC ID token | Authenticates to IAP |
+| `X-Candela-Auth` | User's ADC OAuth2 access token | Carries the developer's real identity to the server |
+
+The impersonation flow:
 
 ```
-User ADC → impersonate SA → generateIdToken(audience) → IAP ID token
+User ADC → impersonate iap_service_account → generateIdToken(audience) → IAP OIDC token
 ```
 
 This uses a custom **`iapIdTokenCreator`** IAM role bound to the service account, which grants only:
@@ -137,6 +169,17 @@ This uses a custom **`iapIdTokenCreator`** IAM role bound to the service account
 :::note[Why not `getAccessToken`?]
 Granting `getAccessToken` would let developers impersonate the SA to call any GCP API — including direct LLM API access that bypasses the Candela proxy and its budget enforcement. By only granting `getOpenIdToken`, developers can authenticate through IAP but **cannot** bypass the proxy for direct LLM API access.
 :::
+
+#### Strategy 2: User ADC Only (No IAP)
+
+Without `iap_service_account`, `candela` sends the user's ADC access token directly:
+
+```
+User ADC → oauth2.TokenSource → access token
+            └── Authorization: Bearer <user-access-token>
+```
+
+The server validates this via Strategy 3 (OAuth2 Access Token → userinfo endpoint).
 
 ---
 

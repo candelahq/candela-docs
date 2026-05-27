@@ -122,9 +122,9 @@ This writes the same ADC file that Candela reads. However, `candela auth login` 
 - Works identically on all platforms
 - The Desktop app can refresh tokens without shelling out
 
-## Team Mode: IAP Authentication
+## Team Mode: IAP Authentication (Dual-Token)
 
-When your team runs a Candela server behind [Identity-Aware Proxy (IAP)](https://cloud.google.com/iap), `candela` needs an OIDC ID token scoped to the IAP audience. The `iap_service_account` config field enables this by impersonating a designated service account to mint the token:
+When your team runs a Candela server behind [Identity-Aware Proxy (IAP)](https://cloud.google.com/iap), `candela` uses a **dual-token** authentication flow. IAP requires its own OIDC token, but it also _replaces_ the `Authorization` header with its own JWT — so `candela` must send the developer's real identity through a separate header.
 
 ```yaml
 # ~/.config/candela/config.yaml — Team Mode with IAP
@@ -139,12 +139,19 @@ iap_service_account: candela-server@project.iam.gserviceaccount.com
 
 **How it works**:
 1. Developer runs `candela auth login --provider gcp` to obtain user ADC
-2. On each cloud-model request, `candela` uses the user's ADC to impersonate `iap_service_account`
-3. The impersonation call mints an OIDC ID token with the configured `audience`
-4. The ID token is sent as `Authorization: Bearer <token>` to the Candela server
+2. On each cloud-model request, `candela` sends **two tokens**:
+   - `Proxy-Authorization: Bearer <oidc-token>` — impersonated SA OIDC token for IAP authentication
+   - `X-Candela-Auth: Bearer <access-token>` — the developer's own ADC OAuth2 access token
+3. IAP validates the `Proxy-Authorization` header and lets the request through, replacing `Authorization` with its own JWT
+4. The Candela server reads `X-Candela-Auth` **first** to identify the developer (calls Google's userinfo endpoint)
+5. If `X-Candela-Auth` is absent, it falls back to the `Authorization` header strategies
 
 <Aside type="important">
-The service account must have a custom **`iapIdTokenCreator`** IAM role that grants only `iam.serviceAccounts.getOpenIdToken` — **not** `getAccessToken`. This ensures developers can authenticate through IAP but cannot impersonate the SA for direct LLM API access, which would bypass proxy budget enforcement. See [Security — SA Impersonation](/architecture/security/#strategy-15-sa-impersonation-for-iap-id-tokens) for details.
+The service account must have a custom **`iapIdTokenCreator`** IAM role that grants only `iam.serviceAccounts.getOpenIdToken` — **not** `getAccessToken`. This ensures developers can authenticate through IAP but cannot impersonate the SA for direct LLM API access, which would bypass proxy budget enforcement. See [Security — SA Impersonation](/architecture/security/#strategy-15-dual-token-for-iap-user-adc--iap_service_account) for details.
+</Aside>
+
+<Aside type="note">
+**Why `X-Candela-Auth`?** IAP strips the original `Authorization` header and replaces it with its own identity JWT. Without a separate header, the server would only see IAP's service identity — not the developer who made the request. `X-Candela-Auth` carries the developer's real OAuth2 access token through IAP untouched.
 </Aside>
 
 ## Troubleshooting

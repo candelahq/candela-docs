@@ -100,7 +100,7 @@ audience: "12345678.apps.googleusercontent.com"
 iap_service_account: candela-server@project.iam.gserviceaccount.com
 ```
 
-**What you get**: Everything from Solo Mode, plus cloud models routed through the Candela server with automatic OIDC auth injection via ADC, team-wide cost tracking, and optional budget enforcement.
+**What you get**: Everything from Solo Mode, plus cloud models routed through the Candela server with team-wide cost tracking and optional budget enforcement. When `iap_service_account` is configured, `candela` uses **dual-token authentication**: `Proxy-Authorization` carries an impersonated SA OIDC token for IAP, while `X-Candela-Auth` carries the developer's own OAuth2 access token so the server can identify the real user. See [Authentication — IAP Dual-Token](/getting-started/authentication/#team-mode-iap-authentication-dual-token) for details.
 
 ---
 

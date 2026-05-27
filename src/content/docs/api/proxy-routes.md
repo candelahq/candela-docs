@@ -17,7 +17,9 @@ All Candela proxy components (`candela`, `candela-server`, `candela-sidecar`) ex
 | `/proxy/anthropic-direct/*` | Anthropic (direct API) | Native Messages API | Anthropic API key |
 | `/proxy/anthropic-bedrock/*` | Anthropic (via AWS Bedrock) | Native Messages API | AWS SigV4 |
 
-## OpenAI-Compatible Endpoint
+## OpenAI-Compatible Endpoints
+
+### Local (`candela` on `:1234`)
 
 `candela` exposes an LM Studio-compatible endpoint on `:1234`:
 
@@ -25,6 +27,15 @@ All Candela proxy components (`candela`, `candela-server`, `candela-sidecar`) ex
 |-------|-------------|
 | `GET /v1/models` | List all available models (local + cloud merged) |
 | `POST /v1/chat/completions` | Chat completions (auto-routes to correct backend) |
+
+### Server (`candela-server` on `:8181`)
+
+The Candela server also exposes OpenAI-compatible endpoints. The model list is **auto-derived from the pricing table** — every model with a pricing entry is available:
+
+| Route | Description |
+|-------|-------------|
+| `GET /v1/models` | List all server-known models (derived from pricing table) |
+| `POST /v1/chat/completions` | Chat completions (routes to the correct upstream provider) |
 
 ## Health Check
 
@@ -79,9 +90,15 @@ curl http://localhost:8181/_local/api/traces?limit=20
 
 | Header | Description |
 |--------|-------------|
-| `Authorization` | `Bearer <token>` — Required for candela-server |
+| `Authorization` | `Bearer <token>` — Required for candela-server (OIDC ID token or OAuth2 access token) |
+| `Proxy-Authorization` | `Bearer <oidc-token>` — IAP authentication token (impersonated SA OIDC). Used when connecting through IAP; IAP validates this header instead of `Authorization` |
+| `X-Candela-Auth` | `Bearer <access-token>` — Developer's OAuth2 access token for user identity behind IAP. **Takes priority** over `Authorization` when present |
 | `traceparent` | W3C Trace Context — enables unified trace trees |
 | `tracestate` | W3C Trace State — forwarded to upstream |
+
+:::note[IAP dual-token flow]
+Behind IAP, the `Authorization` header is replaced by IAP's own JWT. `candela` sends the developer's real identity via `X-Candela-Auth`, which the server checks **first**. If absent, the server falls back to the `Authorization` header. See [Security — Dual-Token Auth](/architecture/security/#strategy-15-dual-token-for-iap-user-adc--iap_service_account) for the full flow.
+:::
 
 ### Response Headers
 
