@@ -39,6 +39,16 @@ Request arrives
 - Grants are spent **first** (waterfall: earliest-expiring grant → daily budget)
 - Service accounts **skip** budget checks — they have no budget entries
 
+### Denial Reasons
+
+When a request is blocked, the response includes a `reason` field indicating why:
+
+| Reason | Meaning |
+|--------|---------|
+| `budget_exhausted` | Daily budget fully spent |
+| `soft_blocked` | Spend crossed 100% threshold (post-deduction) |
+| `no_budget` | No budget record exists for this user |
+
 ---
 
 ## Setting Up Budgets
@@ -51,7 +61,14 @@ Set a default daily budget for all new users in your server config:
 # config.yaml (candela-server)
 users:
   default_daily_budget_usd: 5.00  # applied to auto-provisioned users
+
+budget:
+  timezone: "America/New_York"  # default: UTC
 ```
+
+:::note[Timezone database]
+The IANA timezone database is embedded in the binary, so `budget.timezone` works correctly even in distroless containers that lack `/usr/share/zoneinfo`.
+:::
 
 ### Admin API
 
@@ -138,6 +155,16 @@ Grants are one-time budget bonuses with expiration dates. They're consumed **bef
     buf curl --protocol connect \
       https://candela.example.com/candela.v1.UserService/ListGrants \
       -d '{"user_id": "alice@example.com", "active_only": true}'
+    ```
+  </TabItem>
+  <TabItem label="Get Grant">
+    ```bash
+    buf curl --protocol connect \
+      https://candela.example.com/candela.v1.UserService/GetGrant \
+      -d '{
+        "user_id": "alice@example.com",
+        "grant_id": "abc123-..."
+      }'
     ```
   </TabItem>
   <TabItem label="Revoke Grant">

@@ -9,7 +9,7 @@ Candela's cost engine calculates the USD cost of every proxied LLM request based
 
 1. Proxy captures `input_tokens` and `output_tokens` from the LLM response
 2. **Cache normalization** — adjusts input tokens to account for prompt caching discounts (see below)
-3. Cost engine resolves pricing: **config override → built-in default → model-name fallback**
+3. Cost engine resolves pricing through the **degradation chain** (see below)
 4. Applies model-level discount, then global discount
 5. Final cost is recorded on the span and deducted from the user's budget
 
@@ -35,7 +35,7 @@ Any model available in your Vertex AI Model Garden or via direct API is supporte
 | **Local** | Llama, Qwen, Mistral, DeepSeek — anything in Ollama | Free ($0.00) |
 
 :::note[Source of truth]
-For the full list of models with built-in pricing, see [`pkg/costcalc/calculator.go`](https://github.com/candelahq/candela/blob/main/pkg/costcalc/calculator.go). Models not in this list still work — they just report cost as $0.00 until you add a pricing override.
+For the full list of models with built-in pricing, see [`pkg/costcalc/pricing.yaml`](https://github.com/candelahq/candela/blob/main/pkg/costcalc/pricing.yaml). Models not in this list still work — they just report cost as $0.00 until you add a pricing override.
 :::
 
 ## Custom Pricing Overrides
@@ -62,13 +62,23 @@ pricing:
       discount_percent: 0.10      # additional 10% model discount
 ```
 
-### Pricing Resolution Order
+### Pricing Degradation Chain
 
-1. **Config override** (exact `provider/model` match)
-2. **Built-in default** (exact `provider/model` match)
-3. **Model-name fallback** (provider-agnostic, alphabetical provider tie-break)
+Candela resolves pricing through a three-tier degradation chain. The first source with a matching entry wins:
 
-This means `gemini-2.5-pro` will match even if the request doesn't specify a provider.
+1. **Firestore Catalog** — runtime pricing managed via the Admin API. Use this for dynamic pricing updates without redeploying.
+2. **Config YAML overrides** — per-model entries in your `config.yaml` (see above). Use this for negotiated enterprise rates.
+3. **Embedded defaults** — [`pricing.yaml`](https://github.com/candelahq/candela/blob/main/pkg/costcalc/pricing.yaml), compiled into the binary at build time. Ships with list prices for all common models.
+
+Within each tier, matching is by exact `provider/model`. If no provider is specified, a **model-name fallback** matches provider-agnostically (alphabetical provider tie-break). This means `gemini-2.5-pro` will match even if the request doesn't specify a provider.
+
+### Model ID Normalization
+
+Vertex AI sometimes sends model IDs with hyphens instead of dots (e.g., `claude-opus-4-7` instead of `claude-opus-4.7`). Candela's `normalizeModelID` function automatically converts these before pricing lookup, so you don't need separate entries for both forms.
+
+:::note[Startup validation]
+`pricing.yaml` entries are validated at startup. If any entry has invalid or missing fields (e.g., a negative price, missing provider), the server **panics** rather than running with broken pricing data.
+:::
 
 ### Unknown Models
 
