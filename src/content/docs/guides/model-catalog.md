@@ -169,13 +169,11 @@ buf curl --protocol connect \
       "input_per_million": 0.08,
       "output_per_million": 0.35
     },
-    "update_mask": {
-      "paths": ["input_per_million", "output_per_million"]
-    }
+    "updateMask": "inputPerMillion,outputPerMillion"
   }'
 ```
 
-Supported field mask paths: `enabled`, `display_name`, `input_per_million`, `output_per_million`, `input_per_million_high`, `output_per_million_high`, `tier_threshold_tokens`, `discount_percent`, `category`, `context_window`, `aliases`, `allowed_tenants`.
+Supported field mask paths: `enabled`, `displayName`, `inputPerMillion`, `outputPerMillion`, `inputPerMillionHigh`, `outputPerMillionHigh`, `tierThresholdTokens`, `discountPercent`, `category`, `contextWindow`, `aliases`, `allowedTenants`.
 
 ### GetModelCatalogEntry
 

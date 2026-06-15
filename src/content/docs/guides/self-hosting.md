@@ -283,10 +283,13 @@ users:
 # sinks:
 #   otlp:
 #     enabled: true
+#     required: false
 #     endpoint: "http://localhost:4318"
 #     protocol: "http"
 #     compression: "gzip"
 #     timeout_sec: 30
+#     headers:
+#       Authorization: "Bearer <token>"
 ```
 
 ---
