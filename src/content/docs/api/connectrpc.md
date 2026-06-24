@@ -432,15 +432,14 @@ Lists all projects visible to the authenticated user.
 * **Request**: `ListProjectsRequest`
   ```protobuf
   message ListProjectsRequest {
-    int32 page_size = 1;
-    string page_token = 2;
+    candela.types.PaginationRequest pagination = 1;
   }
   ```
 * **Response**: `ListProjectsResponse`
   ```protobuf
   message ListProjectsResponse {
     repeated candela.types.Project projects = 1;
-    string next_page_token = 2;
+    candela.types.PaginationResponse pagination = 2;
   }
   ```
 
