@@ -51,7 +51,19 @@ Set a default daily budget for all new users in your server config:
 # config.yaml (candela-server)
 users:
   default_daily_budget_usd: 5.00  # applied to auto-provisioned users
+
+budget:
+  timezone: "America/Los_Angeles"  # IANA timezone for daily budget period resets
 ```
+
+:::note[Budget timezone]
+The `budget.timezone` config option controls which timezone is used to determine when daily budget periods reset. If omitted, it defaults to `UTC`. Use any valid [IANA timezone identifier](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) (e.g., `America/New_York`, `Europe/London`, `Asia/Tokyo`).
+
+This affects:
+- When daily spend counters reset to `$0.00`
+- The `period_key` value returned by `GetMyBudget` (e.g., `2026-05-04`)
+- The `period_resets_at` timestamp in budget responses
+:::
 
 ### Admin API
 

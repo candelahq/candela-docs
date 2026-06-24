@@ -162,7 +162,10 @@ Requires admin credentials (OAuth2/ID token with appropriate roles).
 * **Grants**:
   * `CreateGrant`: Issue one-time credits with startup and expiration dates.
   * `ListGrants`: Show active and expired grants.
+  * `GetGrant`: Retrieve details for a single grant by ID.
   * `RevokeGrant`: Cancel/expire an active grant.
+* **Leaderboard**:
+  * `GetJobLeaderboard`: Returns a ranked list of users by their job completion metrics, useful for gamified dashboards.
 * **Audit Trail**:
   * `ListAuditLog`: Retrieve an immutable audit trail of actions taken on a user.
 
@@ -256,7 +259,7 @@ Returns all annotations (outcomes, labels, and metrics) associated with a trace.
 
 ## 4. RuntimeService
 
-Orchestrates local model servers (Ollama, vLLM, LM Studio) inside the local environment (`candela-local`).
+Orchestrates local model servers (Ollama, vLLM, LM Studio) inside the local environment (`candela`).
 
 * **Process Control**:
   * `StartRuntime`: Start the configured inference daemon (e.g., Ollama or vLLM).
@@ -320,3 +323,218 @@ Orchestrates local model servers (Ollama, vLLM, LM Studio) inside the local envi
 
 * **Catalog**:
   * `ListCatalog`: Retrieve recommended models to install.
+
+---
+
+## 5. ModelCatalogService
+
+Manages the centralized model catalog — the registry of all models known to the Candela server, including their pricing, capabilities, and availability.
+
+### `ListModelCatalog`
+
+Returns all entries in the model catalog, with optional filtering.
+
+* **Request**: `ListModelCatalogRequest`
+  ```protobuf
+  message ListModelCatalogRequest {
+    string provider = 1;       // optional: filter by provider
+    string capability = 2;     // optional: filter by capability (e.g., "vision", "code")
+    int32 page_size = 10;
+    string page_token = 11;
+  }
+  ```
+* **Response**: `ListModelCatalogResponse`
+  ```protobuf
+  message ListModelCatalogResponse {
+    repeated candela.types.ModelCatalogEntry entries = 1;
+    string next_page_token = 2;
+  }
+  ```
+
+### `UpdateModelCatalogEntry`
+
+Updates an existing model catalog entry (e.g., pricing, display name, or capability tags).
+
+* **Request**: `UpdateModelCatalogEntryRequest`
+  ```protobuf
+  message UpdateModelCatalogEntryRequest {
+    candela.types.ModelCatalogEntry entry = 1;
+    google.protobuf.FieldMask update_mask = 2;
+  }
+  ```
+* **Response**: `UpdateModelCatalogEntryResponse`
+  ```protobuf
+  message UpdateModelCatalogEntryResponse {
+    candela.types.ModelCatalogEntry entry = 1;
+  }
+  ```
+
+### `DeleteModelCatalogEntry`
+
+Removes a model from the catalog. Existing traces referencing this model are unaffected.
+
+* **Request**: `DeleteModelCatalogEntryRequest`
+  ```protobuf
+  message DeleteModelCatalogEntryRequest {
+    string model_id = 1;
+  }
+  ```
+* **Response**: `DeleteModelCatalogEntryResponse`
+  ```protobuf
+  message DeleteModelCatalogEntryResponse {}
+  ```
+
+---
+
+## 6. ProjectService
+
+Manages Candela projects — logical groupings for organizing models, users, and traces.
+
+### `CreateProject`
+
+Creates a new project.
+
+* **Request**: `CreateProjectRequest`
+  ```protobuf
+  message CreateProjectRequest {
+    string display_name = 1;
+    string description = 2;
+  }
+  ```
+* **Response**: `CreateProjectResponse`
+  ```protobuf
+  message CreateProjectResponse {
+    candela.types.Project project = 1;
+  }
+  ```
+
+### `GetProject`
+
+Retrieves a project by ID.
+
+* **Request**: `GetProjectRequest`
+  ```protobuf
+  message GetProjectRequest {
+    string project_id = 1;
+  }
+  ```
+* **Response**: `GetProjectResponse`
+  ```protobuf
+  message GetProjectResponse {
+    candela.types.Project project = 1;
+  }
+  ```
+
+### `ListProjects`
+
+Lists all projects visible to the authenticated user.
+
+* **Request**: `ListProjectsRequest`
+  ```protobuf
+  message ListProjectsRequest {
+    candela.types.PaginationRequest pagination = 1;
+  }
+  ```
+* **Response**: `ListProjectsResponse`
+  ```protobuf
+  message ListProjectsResponse {
+    repeated candela.types.Project projects = 1;
+    candela.types.PaginationResponse pagination = 2;
+  }
+  ```
+
+### `UpdateProject`
+
+Updates project metadata.
+
+* **Request**: `UpdateProjectRequest`
+  ```protobuf
+  message UpdateProjectRequest {
+    candela.types.Project project = 1;
+    google.protobuf.FieldMask update_mask = 2;
+  }
+  ```
+* **Response**: `UpdateProjectResponse`
+  ```protobuf
+  message UpdateProjectResponse {
+    candela.types.Project project = 1;
+  }
+  ```
+
+### `DeleteProject`
+
+Deletes a project. All associated traces and configuration are removed.
+
+* **Request**: `DeleteProjectRequest`
+  ```protobuf
+  message DeleteProjectRequest {
+    string project_id = 1;
+  }
+  ```
+* **Response**: `DeleteProjectResponse`
+  ```protobuf
+  message DeleteProjectResponse {}
+  ```
+
+---
+
+## 7. TraceService
+
+Provides query and retrieval APIs for LLM request traces stored by Candela.
+
+### `GetTrace`
+
+Retrieves a single trace by its trace ID.
+
+* **Request**: `GetTraceRequest`
+  ```protobuf
+  message GetTraceRequest {
+    string trace_id = 1;
+  }
+  ```
+* **Response**: `GetTraceResponse`
+  ```protobuf
+  message GetTraceResponse {
+    candela.types.Trace trace = 1;
+  }
+  ```
+
+### `ListTraces`
+
+Queries traces with filtering and pagination.
+
+* **Request**: `ListTracesRequest`
+  ```protobuf
+  message ListTracesRequest {
+    string project_id = 1;
+    candela.types.TimeRange time_range = 2;
+    string model = 3;            // optional: filter by model
+    string user_id = 4;          // optional: filter by user
+    string status = 5;           // optional: "ok", "error"
+    int32 page_size = 10;
+    string page_token = 11;
+  }
+  ```
+* **Response**: `ListTracesResponse`
+  ```protobuf
+  message ListTracesResponse {
+    repeated candela.types.Trace traces = 1;
+    string next_page_token = 2;
+    int32 total_count = 3;
+  }
+  ```
+
+### `DeleteTrace`
+
+Deletes a trace by ID. Associated annotations are also removed.
+
+* **Request**: `DeleteTraceRequest`
+  ```protobuf
+  message DeleteTraceRequest {
+    string trace_id = 1;
+  }
+  ```
+* **Response**: `DeleteTraceResponse`
+  ```protobuf
+  message DeleteTraceResponse {}
+  ```
