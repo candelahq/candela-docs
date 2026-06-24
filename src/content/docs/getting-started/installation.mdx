@@ -51,11 +51,22 @@ candela auth login     # opens browser — Google OAuth flow
 candela auth status    # verify credentials
 ```
 
-Credentials are stored at `~/.config/candela/adc.json` (ADC-compatible). No `gcloud` CLI required.
+Credentials are stored at `~/.config/gcloud/application_default_credentials.json` (ADC-compatible). No `gcloud` CLI required.
 
 :::tip[gcloud also works]
 If you already have `gcloud auth application-default login` set up, candela will use those credentials automatically as a fallback.
 :::
+
+#### AWS Authentication (Bedrock)
+
+To use Anthropic models via AWS Bedrock, authenticate with your AWS credentials:
+
+```bash
+candela auth login --provider aws    # configures AWS credential chain
+candela auth status                  # verify both GCP and AWS credentials
+```
+
+This configures the AWS credential chain for SigV4 signing. You can also set `AWS_PROFILE`, `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY`, or use IAM roles — candela respects the standard AWS SDK credential resolution order.
 
 :::tip[Solo + Cloud]
 Add `providers` and `vertex_ai` to route cloud models (Gemini, Claude) through candela. See [candela docs](/components/candela/).
