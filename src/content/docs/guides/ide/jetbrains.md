@@ -76,6 +76,43 @@ The [`candela-jetbrains`](https://github.com/candelahq/candela-jetbrains) plugin
 * **Grant display** — active bonus grants with remaining amounts and expiry countdowns
 * **Offline backoff** — shows `🕯️ offline` when Candela isn't running, backs off to 5-minute polling to avoid noise
 * **Startup health check** — brief notification on project open confirming connection
+* **AI chat panel** — integrated chat window for conversing with LLMs directly in the IDE
+* **Focus chat shortcut** — press `Cmd+Shift+L` (macOS) or `Ctrl+Shift+L` (Windows/Linux) to instantly focus the chat panel from anywhere in the IDE
+* **Progress indicators** — visual feedback for model loading, thinking state, and dashboard data fetching
+* **Context-aware editor actions** — sends file path, imports, enclosing class/function, and line range to the LLM for richer, more relevant responses
+* **Graceful error handling** — network failures, timeouts, and unexpected errors display user-friendly messages with retry options and backoff
+
+### Keyboard Shortcuts
+
+| Shortcut | Platform | Action |
+|----------|----------|--------|
+| `Cmd+Shift+L` | macOS | Focus the Candela chat panel |
+| `Ctrl+Shift+L` | Windows / Linux | Focus the Candela chat panel |
+
+:::tip[Quick access]
+Use `Cmd+Shift+L` / `Ctrl+Shift+L` to jump to the chat panel from anywhere in the editor — no mouse required.
+:::
+
+### Context-Aware Editor Actions
+
+When you invoke Candela from the editor (e.g., explain code, refactor, generate tests), the plugin automatically enriches the request with:
+
+| Context | Example |
+|---------|--------|
+| **File path** | `src/main/kotlin/com/example/Service.kt` |
+| **Imports** | `import kotlinx.coroutines.flow.*` |
+| **Enclosing class/function** | `class UserService` / `fun fetchUser()` |
+| **Selected line range** | Lines 42–67 |
+
+This additional context helps the LLM generate more accurate, project-aware responses without manual copy-pasting.
+
+### Progress Indicators
+
+The plugin shows visual feedback at each stage of an AI interaction:
+
+* **Model loading** — spinner while the model initializes
+* **Thinking indicator** — animated indicator while the LLM processes your request
+* **Dashboard fetch** — loading state when retrieving cost and usage data
 
 ### Installation
 
@@ -126,6 +163,25 @@ Access from **Tools → Candela** or via the command palette:
 | **Open Dashboard** | Launch the Candela web dashboard in your browser |
 | **Refresh Status** | Force refresh status bar data |
 
+### Architecture & Reliability
+
+The plugin is built for production-grade reliability:
+
+* **Structured concurrency** — all async operations are managed through `CandelaCoroutineService`, a project-scoped coroutine service that ensures clean lifecycle management. No leaked coroutines or fire-and-forget tasks.
+* **Stream identity checks** — a monotonic `streamGeneration` counter prevents stale UI callbacks. All four callback sites (`onToken`, `onComplete`, `onError`, and `CancellationException`) are guarded against out-of-order updates from cancelled or superseded streams.
+* **Exponential backoff with jitter** — status bar refresh uses randomized exponential backoff to avoid thundering-herd issues and reduce noise when the server is unreachable.
+
+### Error Handling
+
+The plugin handles failures gracefully at every layer:
+
+| Scenario | Behavior |
+|----------|----------|
+| **Network timeout** | Displays inline error with retry option; backs off polling interval |
+| **Server unreachable** | Status bar shows `🕯️ offline`; polling interval increases to 5 minutes |
+| **Stream interrupted** | Stale callbacks are discarded via stream generation guard; UI remains consistent |
+| **Unexpected exception** | Caught by structured concurrency scope; logged and surfaced as a non-blocking notification |
+
 ### Development
 
 ```bash
@@ -138,6 +194,6 @@ nix develop -c ./gradlew runIde
 # Build distribution
 nix develop -c ./gradlew buildPlugin
 
-# Run tests
+# Run tests (covering lifecycle, streaming, UI, and error handling)
 nix develop -c ./gradlew test
 ```
