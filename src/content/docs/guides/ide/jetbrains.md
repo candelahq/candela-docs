@@ -77,20 +77,20 @@ The [`candela-jetbrains`](https://github.com/candelahq/candela-jetbrains) plugin
 * **Offline backoff** — shows `🕯️ offline` when Candela isn't running, backs off to 5-minute polling to avoid noise
 * **Startup health check** — brief notification on project open confirming connection
 * **AI chat panel** — integrated chat window for conversing with LLMs directly in the IDE
-* **Focus chat shortcut** — press `⌘⇧L` (macOS) or `Ctrl+Shift+L` (Windows/Linux) to instantly focus the chat panel from anywhere in the IDE
+* **Focus chat shortcut** — press `Cmd+Shift+L` (macOS) or `Ctrl+Shift+L` (Windows/Linux) to instantly focus the chat panel from anywhere in the IDE
 * **Progress indicators** — visual feedback for model loading, thinking state, and dashboard data fetching
 * **Context-aware editor actions** — sends file path, imports, enclosing class/function, and line range to the LLM for richer, more relevant responses
-* **Graceful error handling** — network failures, timeouts, and unexpected errors display user-friendly messages with automatic retry options
+* **Graceful error handling** — network failures, timeouts, and unexpected errors display user-friendly messages with retry options and backoff
 
 ### Keyboard Shortcuts
 
 | Shortcut | Platform | Action |
 |----------|----------|--------|
-| `⌘⇧L` | macOS | Focus the Candela chat panel |
+| `Cmd+Shift+L` | macOS | Focus the Candela chat panel |
 | `Ctrl+Shift+L` | Windows / Linux | Focus the Candela chat panel |
 
 :::tip[Quick access]
-Use `⌘⇧L` / `Ctrl+Shift+L` to jump to the chat panel from anywhere in the editor — no mouse required.
+Use `Cmd+Shift+L` / `Ctrl+Shift+L` to jump to the chat panel from anywhere in the editor — no mouse required.
 :::
 
 ### Context-Aware Editor Actions
@@ -194,6 +194,6 @@ nix develop -c ./gradlew runIde
 # Build distribution
 nix develop -c ./gradlew buildPlugin
 
-# Run tests (121 tests covering lifecycle, streaming, UI, and error handling)
+# Run tests (covering lifecycle, streaming, UI, and error handling)
 nix develop -c ./gradlew test
 ```
