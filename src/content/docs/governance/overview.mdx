@@ -33,6 +33,9 @@ Every Candela deployment — whether `candela` on a developer laptop or `candela
   <Card title="eBPF Enforcement" icon="rocket">
     Kernel-level enforcement ensures all LLM traffic flows through the proxy. Transparent `iptables` redirection with SNI-based routing, Cilium network policies, and Tetragon process enforcement — making bypass impossible, even by misconfigured workloads.
   </Card>
+  <Card title="Model Access Control" icon="approve-check-circle">
+    Tag-based access gating on LLM models. Assign `access_tags` to users and set `required_access` on catalog entries — only users with a matching tag can access restricted models. Tenant isolation via `allowed_tenants`. Both gates fail-closed.
+  </Card>
 </CardGrid>
 
 ---
@@ -63,8 +66,8 @@ Request arrives
        │
        ▼
 ┌─────────────┐
-│ Model Policy│──── Unapproved model? ────────▶ HTTP 403
-│  (roadmap)  │
+│ Access Tag  │──── Missing required tag? ────▶ HTTP 403
+│    Gate     │
 └──────┬──────┘
        │
        ▼
@@ -97,11 +100,6 @@ These governance capabilities are designed and tracked on the [Enterprise Govern
 
 <CardGrid>
   <LinkCard
-    title="Model Access Control"
-    description="Global and per-tenant model allowlists/blocklists. Reject unapproved models at the proxy layer."
-    href="/governance/model-access/"
-  />
-  <LinkCard
     title="PHI/PII Scanning"
     description="Pre-flight scanning for protected health information. Block, redact, warn, or log — configurable per tenant."
     href="https://github.com/candelahq/candela/issues/159"
@@ -123,7 +121,7 @@ These governance capabilities are designed and tracked on the [Enterprise Govern
 ## Governance Pages
 
 <LinkCard title="Budget Enforcement" description="Per-user spending limits, grants, alerts, and rate limiting." href="/governance/budgets/" />
-<LinkCard title="Model Access Control" description="Restrict which LLM models your users and tenants can access." href="/governance/model-access/" />
+<LinkCard title="Model Access Control" description="Tag-based access gating — restrict models by user access tags and tenant isolation." href="/governance/model-access/" />
 <LinkCard title="Audit & Compliance" description="Immutable audit trails, compliance scoring, and exportable reports." href="/governance/audit-compliance/" />
 <LinkCard title="Multitenancy" description="Tenant isolation, attribution, and per-tenant governance controls." href="/governance/multitenancy/" />
 <LinkCard title="eBPF Enforcement" description="Kernel-level enforcement via Tetragon, Cilium, and iptables — guarantee all LLM traffic flows through the proxy." href="/governance/ebpf-enforcement" />

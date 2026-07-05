@@ -1,28 +1,28 @@
 ---
 title: Model Access Control
-description: Restrict which LLM models your users and tenants can access.
+description: Restrict which LLM models your users and tenants can access using access tags and tenant gates.
 ---
 
 import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
 
-<Aside type="note" title="Coming Soon">
-  Model access control is tracked as [#207](https://github.com/candelahq/candela/issues/207) on the [Enterprise Governance & Compliance](https://github.com/orgs/candelahq/projects/4) project board. The design below reflects the planned implementation.
-</Aside>
+Model access control lets you restrict which LLM models each user or tenant can access. It works through **access tags** — lightweight string labels assigned to users and required by models. Requests from users who lack the required tags are rejected with `403 Forbidden` before they ever reach the LLM provider.
 
-Model access control lets you define which LLM models are approved for use within your organization. Requests for unapproved models are rejected at the proxy layer with a `403 Forbidden` response and a full audit trail entry.
+## Overview
 
-## Why Model Access Control?
+Access tags are the core primitive for model gating:
 
-Not all models are appropriate for every workload:
+- **Users** carry a set of access tags (e.g. `["pro", "experimental"]`) stored in their `UserRecord`
+- **Models** declare which tags are required to access them via `required_access` on the catalog entry
+- At request time, Candela checks for an **any-match intersection** — if the user has _any_ of the required tags, the request proceeds
+- Models with no `required_access` are open to everyone
 
-- **Compliance**: Some models aren't approved for handling sensitive data
-- **Cost**: GPT-4o costs 10-30× more than GPT-4o-mini for similar tasks
-- **Consistency**: Standardize on approved models to reduce operational complexity
-- **Vendor risk**: Limit exposure to specific providers
+There's also a **tenant isolation gate** — models can be restricted to specific tenant IDs via `allowed_tenants`, enforced independently of access tags.
+
+Both gates are **fail-closed**: catalog lookup errors, user store errors, and missing data always result in a `500` or `403` — never silent pass-through.
 
 ## How It Works
 
-The model access policy is evaluated as a pre-flight check in the [governance pipeline](/governance/overview/), after the request body is parsed but before the budget gate:
+The access tag gate is evaluated as a pre-flight check in the [governance pipeline](/governance/overview/), after the request body is parsed but before the budget gate:
 
 ```
 Request: POST /proxy/openai/v1/chat/completions
@@ -30,113 +30,279 @@ Body:    { "model": "gpt-4o", ... }
          │
          ▼
 ┌─────────────────┐
-│  Model Policy   │──── "gpt-4o" in allowlist? ──▶ ✅ Continue
-│  Evaluation     │──── "gpt-4o" in blocklist? ──▶ ❌ HTTP 403
-└─────────────────┘
+│  Catalog Lookup │  Look up ModelCatalogEntry
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│  Tenant Gate    │──── allowed_tenants mismatch? ──▶ 403 tenant_access_denied
+└────────┬────────┘
+         │ ✅
+         ▼
+┌─────────────────┐
+│  Access Tag     │──── No matching tags? ──────────▶ 403 access_denied
+│  Gate           │──── Admin user? ────────────────▶ ✅ Bypass
+└────────┬────────┘
+         │ ✅
+         ▼
+   Continue to budget gate...
 ```
+
+### Tag Intersection Logic
+
+The access check uses **any-match intersection**: the user must have at least one tag that appears in the model's `required_access` list.
+
+| Model `required_access` | User `access_tags` | Result |
+|---|---|---|
+| `["pro"]` | `["pro", "basic"]` | ✅ Allowed — `pro` matches |
+| `["pro", "enterprise"]` | `["basic"]` | ❌ Denied — no overlap |
+| `["experimental"]` | `["pro", "experimental"]` | ✅ Allowed — `experimental` matches |
+| `[]` (empty) | `[]` (empty) | ✅ Allowed — no restriction |
+| `[]` (empty) | `["pro"]` | ✅ Allowed — no restriction |
+
+### Admin Bypass
+
+Users with the **admin** role bypass all access tag checks. Admins can always access every model, regardless of `required_access` or `allowed_tenants` on the catalog entry.
+
+### Fail-Closed Enforcement
+
+Both gates fail-closed by design:
+
+- **Catalog lookup error** → `500` (request never proceeds)
+- **User store lookup error** → `500` (request never proceeds)
+- **User has no matching tags** → `403 access_denied`
+- **Tenant ID mismatch** → `403 tenant_access_denied`
+
+Candela never silently passes a request through when a gate component fails.
 
 ## Configuration
 
-### Global Allowlist
+### Catalog Entries — `required_access`
 
-Define a global model allowlist that applies to all tenants:
+Set `required_access` on a `ModelCatalogEntry` to restrict which users can access the model. This is a repeated string field on the proto:
+
+```protobuf
+message ModelCatalogEntry {
+  // ...existing fields...
+  repeated string required_access = 15;   // tags required to access this model
+  repeated string allowed_tenants = 12;   // tenant IDs allowed to access this model
+}
+```
+
+Via the admin API:
+
+```bash
+# Restrict a model to users with "pro" or "enterprise" tags
+buf curl --protocol connect \
+  https://candela.example.com/candela.v1.ModelCatalogService/UpdateModelCatalogEntry \
+  -d '{
+    "entry": {
+      "provider": "openai",
+      "model_id": "o1-pro",
+      "required_access": ["pro", "enterprise"]
+    },
+    "updateMask": "requiredAccess"
+  }'
+```
+
+### Users — `access_tags`
+
+Set `access_tags` on a `User` record to grant model access. This is a repeated string field on the proto:
+
+```protobuf
+message User {
+  // ...existing fields...
+  repeated string access_tags = 10;   // e.g. ["pro", "experimental"]
+}
+```
+
+Via the admin API:
+
+```bash
+# Grant a user "pro" and "experimental" access
+buf curl --protocol connect \
+  https://candela.example.com/candela.v1.UserService/UpdateUser \
+  -d '{
+    "user": {
+      "user_id": "alice@example.com",
+      "access_tags": ["pro", "experimental"]
+    },
+    "updateMask": "accessTags"
+  }'
+```
+
+## Tenant Isolation
+
+The `allowed_tenants` field on a catalog entry restricts which tenants can access a model. This gate is evaluated independently of access tags and uses the `X-Candela-Tenant-Id` request header.
+
+```bash
+# Restrict a model to the "acme" tenant only
+buf curl --protocol connect \
+  https://candela.example.com/candela.v1.ModelCatalogService/UpdateModelCatalogEntry \
+  -d '{
+    "entry": {
+      "provider": "google",
+      "model_id": "gemini-2.5-pro",
+      "allowed_tenants": ["acme", "globex"]
+    },
+    "updateMask": "allowedTenants"
+  }'
+```
+
+| Model `allowed_tenants` | Request `X-Candela-Tenant-Id` | Result |
+|---|---|---|
+| `["acme"]` | `acme` | ✅ Allowed |
+| `["acme"]` | `other` | ❌ `403 tenant_access_denied` |
+| `["acme", "globex"]` | `globex` | ✅ Allowed |
+| `[]` (empty) | `anything` | ✅ Allowed — no restriction |
+
+## Service Accounts
+
+Service accounts (SAs) are treated as **individual users** — they are not granted any special privileges for access tag gating. The proxy looks up the SA's `UserRecord` in the user store and checks its `access_tags` like any other user.
+
+<Aside type="caution" title="Fail-closed for unknown SAs">
+  Service accounts without a `UserRecord` in the user store can only access unrestricted models (those with empty `required_access`). If a model requires access tags and the SA has no user record, the request is denied. This is intentional fail-closed behavior.
+</Aside>
+
+To grant a service account access to restricted models, create a `UserRecord` for it with the appropriate `access_tags`:
+
+```bash
+buf curl --protocol connect \
+  https://candela.example.com/candela.v1.UserService/CreateUser \
+  -d '{
+    "user": {
+      "user_id": "pipeline-sa@your-project.iam.gserviceaccount.com",
+      "role": "DEVELOPER",
+      "access_tags": ["pro"]
+    }
+  }'
+```
+
+## Error Responses
+
+When access is denied, the proxy returns a `403` with a structured error body:
 
 <Tabs>
-  <TabItem label="Allowlist (recommended)">
-    Only these models are permitted. Everything else is blocked.
+  <TabItem label="Access Tag Denied">
+    Returned when the user lacks the required access tags for a model:
 
-    ```yaml
-    # config.yaml
-    governance:
-      models:
-        mode: allowlist
-        allowed:
-          - gpt-4o-mini
-          - gpt-4o
-          - gemini-3.5-pro
-          - gemini-3.5-flash
-          - gemini-2.5-pro
-          - gemini-2.5-flash
-          - claude-sonnet-4-20250514
+    ```json
+    {
+      "error": {
+        "message": "model requires access tags: [pro]; user has: []",
+        "type": "access_denied",
+        "code": "403"
+      }
+    }
     ```
   </TabItem>
-  <TabItem label="Blocklist">
-    All models are permitted except these. Use when you want to block specific high-cost or unapproved models.
+  <TabItem label="Tenant Denied">
+    Returned when the request's tenant ID doesn't match the model's `allowed_tenants`:
 
-    ```yaml
-    # config.yaml
-    governance:
-      models:
-        mode: blocklist
-        blocked:
-          - o1-pro
-          - claude-opus-4-20250514
+    ```json
+    {
+      "error": {
+        "message": "model restricted to tenants: [acme]; request tenant: other",
+        "type": "tenant_access_denied",
+        "code": "403"
+      }
+    }
     ```
   </TabItem>
 </Tabs>
 
-### Per-Tenant Overrides
+Both error types include the exact tags or tenants involved, making it straightforward to diagnose access issues.
 
-Tenants can have their own model policies that override the global policy:
+## Tag Conventions
+
+Access tags are arbitrary strings — you define the naming scheme that fits your organization. Here are recommended conventions:
+
+| Tag Pattern | Purpose | Examples |
+|---|---|---|
+| Tier tags | Control access by subscription level | `basic`, `pro`, `enterprise` |
+| Preview tags | Gate unstable or experimental models | `experimental`, `beta`, `preview` |
+| Geographic tags | Enforce data residency requirements | `geo:us`, `geo:eu`, `geo:apac` |
+| Team tags | Restrict models to specific teams | `team:research`, `team:platform` |
+
+<Aside type="tip" title="Keep tags flat">
+  Tags are compared as exact string matches. There's no hierarchy — `pro` doesn't imply `basic`. If a user needs access to models gated on either tag, assign both: `["basic", "pro"]`.
+</Aside>
+
+## Examples
+
+### Tiered model access
+
+Offer different model tiers based on user subscription level:
 
 ```yaml
-# config.yaml
-governance:
-  models:
-    mode: allowlist
-    allowed:
-      - gpt-4o-mini
-      - gemini-2.5-flash
+# Catalog entries (conceptual)
+- model_id: "gpt-4o-mini"
+  required_access: []              # open to everyone
 
-  tenants:
-    research-team:
-      models:
-        # Research team gets access to expensive models
-        allowed:
-          - gpt-4o
-          - claude-sonnet-4-20250514
-          - gemini-3.5-pro
-          - gemini-2.5-pro
-    contractor-pool:
-      models:
-        # Contractors restricted to cost-efficient models only
-        allowed:
-          - gpt-4o-mini
-          - gemini-3.5-flash
-          - gemini-2.5-flash
+- model_id: "gpt-4o"
+  required_access: ["pro"]         # pro users and above
+
+- model_id: "o1-pro"
+  required_access: ["enterprise"]  # enterprise only
 ```
 
-## Enforcement Behavior
+```yaml
+# User records
+- user_id: "free-user@example.com"
+  access_tags: ["basic"]            # can only use gpt-4o-mini
 
-When a request is blocked:
+- user_id: "paid-user@example.com"
+  access_tags: ["basic", "pro"]     # can use gpt-4o-mini and gpt-4o
 
-- **HTTP Status**: `403 Forbidden`
-- **Response Body**: JSON with the denied model name and policy reason
-- **Audit Log**: Full entry with request metadata, user, tenant, and denied model
-- **Metrics**: `candela_policy_model_denied_total` counter incremented
-
-```json
-{
-  "error": "model_not_allowed",
-  "message": "Model 'o1-pro' is not in the approved model list for tenant 'contractor-pool'",
-  "model": "o1-pro",
-  "tenant_id": "contractor-pool",
-  "policy": "allowlist"
-}
+- user_id: "vip@example.com"
+  access_tags: ["basic", "pro", "enterprise"]  # full access
 ```
 
-## Audit Trail
+### Experimental model preview
 
-Every model policy decision — both allowed and denied — is recorded:
+Gate a preview model so only opted-in users can access it:
 
-| Field | Example |
-|-------|---------|
-| `action` | `model_policy_check` |
-| `result` | `denied` or `allowed` |
-| `model` | `o1-pro` |
-| `tenant_id` | `contractor-pool` |
-| `user_id` | `alice@example.com` |
-| `policy_mode` | `allowlist` |
-| `timestamp` | `2026-05-17T00:00:00Z` |
+```bash
+# Tag the model as experimental
+buf curl --protocol connect \
+  https://candela.example.com/candela.v1.ModelCatalogService/UpdateModelCatalogEntry \
+  -d '{
+    "entry": {
+      "provider": "google",
+      "model_id": "gemini-3.0-flash-preview",
+      "required_access": ["experimental"]
+    },
+    "updateMask": "requiredAccess"
+  }'
 
-This gives compliance teams a complete record of which models were used and which were blocked, by whom, and when.
+# Opt a user into the preview
+buf curl --protocol connect \
+  https://candela.example.com/candela.v1.UserService/UpdateUser \
+  -d '{
+    "user": {
+      "user_id": "alice@example.com",
+      "access_tags": ["pro", "experimental"]
+    },
+    "updateMask": "accessTags"
+  }'
+```
+
+### Tenant-scoped model with access tags
+
+Combine both gates — restrict a fine-tuned model to a specific tenant _and_ require a tag:
+
+```bash
+buf curl --protocol connect \
+  https://candela.example.com/candela.v1.ModelCatalogService/UpdateModelCatalogEntry \
+  -d '{
+    "entry": {
+      "provider": "openai",
+      "model_id": "ft:gpt-4o:acme-medical:2026-06",
+      "allowed_tenants": ["acme"],
+      "required_access": ["enterprise"]
+    },
+    "updateMask": "allowedTenants,requiredAccess"
+  }'
+```
+
+This model is only accessible to users in the `acme` tenant who also have the `enterprise` access tag. Admin users bypass both checks.
