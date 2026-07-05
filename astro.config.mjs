@@ -78,10 +78,8 @@ export default defineConfig({
 						{ label: 'OpenTelemetry', slug: 'guides/opentelemetry' },
 						{ label: 'Budgets & Cost Control', slug: 'guides/budgets' },
 						{ label: 'Pricing', slug: 'guides/pricing' },
-						{ label: 'Prompt Caching', slug: 'guides/prompt-caching', badge: { text: 'New', variant: 'success' } },
-						{ label: 'System Prompt Caching', slug: 'guides/system-prompt-caching', badge: { text: 'New', variant: 'success' } },
+						{ label: 'Prompt Caching', slug: 'guides/prompt-caching' },
 						{ label: 'Enrichment SDKs', slug: 'guides/enrichment-sdks' },
-						{ label: 'Multitenancy', slug: 'guides/multitenancy' },
 						{
 							label: 'IDE Integration',
 							items: [
