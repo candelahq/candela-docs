@@ -39,6 +39,16 @@ Request arrives
 - Grants are spent **first** (waterfall: earliest-expiring grant → daily budget)
 - Service accounts **skip** budget checks — they have no budget entries
 
+### Denial Reasons
+
+When a request is blocked, the response includes a `reason` field indicating why:
+
+| Reason | Meaning |
+|--------|---------|
+| `budget_exhausted` | Daily budget fully spent |
+| `soft_blocked` | Spend crossed 100% threshold (post-deduction) |
+| `no_budget` | No budget record exists for this user |
+
 ---
 
 ## Setting Up Budgets
@@ -53,16 +63,18 @@ users:
   default_daily_budget_usd: 5.00  # applied to auto-provisioned users
 
 budget:
-  timezone: "America/Los_Angeles"  # IANA timezone for daily budget period resets
+  timezone: "America/New_York"  # example (defaults to UTC if omitted)
 ```
 
 :::note[Budget timezone]
-The `budget.timezone` config option controls which timezone is used to determine when daily budget periods reset. If omitted, it defaults to `UTC`. Use any valid [IANA timezone identifier](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) (e.g., `America/New_York`, `Europe/London`, `Asia/Tokyo`).
+The `budget.timezone` config controls when daily budget periods reset. Use any valid IANA timezone identifier (e.g., `America/New_York`, `Europe/London`, `Asia/Tokyo`). Defaults to UTC if omitted.
 
 This affects:
-- When daily spend counters reset to `$0.00`
-- The `period_key` value returned by `GetMyBudget` (e.g., `2026-05-04`)
+- When daily spend counters reset to $0.00
+- The `period_key` value returned by `GetMyBudget` (e.g., `2026-07-04`)
 - The `period_resets_at` timestamp in budget responses
+
+The server uses the host OS timezone database (`/usr/share/zoneinfo`). If deploying in minimal containers, ensure timezone data is available or use UTC.
 :::
 
 ### Admin API
@@ -150,6 +162,16 @@ Grants are one-time budget bonuses with expiration dates. They're consumed **bef
     buf curl --protocol connect \
       https://candela.example.com/candela.v1.UserService/ListGrants \
       -d '{"user_id": "alice@example.com", "active_only": true}'
+    ```
+  </TabItem>
+  <TabItem label="Get Grant">
+    ```bash
+    buf curl --protocol connect \
+      https://candela.example.com/candela.v1.UserService/GetGrant \
+      -d '{
+        "user_id": "alice@example.com",
+        "grant_id": "abc123-..."
+      }'
     ```
   </TabItem>
   <TabItem label="Revoke Grant">

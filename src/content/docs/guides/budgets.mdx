@@ -10,7 +10,7 @@ This content has moved to the Governance section for a single source of truth.
 <LinkCard
   title="Budget Enforcement"
   description="Per-user spending limits, grants, alerts, rate limiting, and audit trail."
-  href="/governance/budgets/"
+  href="/candela-docs/governance/budgets/"
 />
 
 ## Quick Summary
@@ -18,9 +18,11 @@ This content has moved to the Governance section for a single source of truth.
 Candela's budget system provides:
 
 - **Per-user daily budgets** — configurable default via `users.default_daily_budget_usd`
+- **Budget timezone** — configure `budget.timezone` for local daily resets (defaults to UTC)
 - **One-time grants** — with expiration dates and waterfall deduction
+- **Denial reasons** — `budget_exhausted`, `soft_blocked`, `no_budget` in 402 responses
 - **Threshold alerts** — at 80%, 90%, and 100% spend
 - **Rate limiting** — per-user request throttling (default: 60 req/min)
 - **Immutable audit trail** — every admin action logged
 
-See the [full Budget Enforcement guide](/governance/budgets/) for API examples, configuration details, and the deduction waterfall.
+See the [full governance docs](/candela-docs/governance/budgets/) for configuration, admin API examples, and architecture details.
