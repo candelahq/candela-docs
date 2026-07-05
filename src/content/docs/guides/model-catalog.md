@@ -79,13 +79,23 @@ Every model in the catalog is represented by an `Entry` with the following field
 | `output_per_million_high` | float | High tier: USD per 1M output tokens (optional) |
 | `tier_threshold_tokens` | int | Token count threshold for high-tier pricing |
 | `aliases` | string[] | Alternative model names that resolve to this entry |
-| `allowed_tenants` | string[] | Restrict model to specific tenant IDs (empty = all) |
+| `required_access` | string[] | Access tags required to use this model (empty = unrestricted). See [Model Access Control](/governance/model-access/) |
+| `allowed_tenants` | string[] | Tenant IDs allowed to access this model (empty = all tenants). See [Model Access Control](/governance/model-access/) |
 | `discount_percent` | float | Model-specific discount (0.0–1.0) |
 | `updated_at` | timestamp | Last modification time (server-set for Firestore) |
 
 ### Tiered Pricing
 
 Some models (notably Gemini) have tiered pricing where costs increase after a token threshold. When `tier_threshold_tokens` is set, the cost engine uses the `_high` rates for the portion of input tokens exceeding the threshold.
+
+### Access Control Fields
+
+The `required_access` and `allowed_tenants` fields enable tag-based model gating. When set, Candela enforces access checks as a pre-flight gate before proxying the request:
+
+- **`required_access`**: A list of access tag strings. The requesting user must have at least one matching tag in their `access_tags` to use the model. If empty, the model is open to everyone. Admin users bypass this check.
+- **`allowed_tenants`**: A list of tenant ID strings. The request's `X-Candela-Tenant-Id` must match one of the listed tenants. If empty, all tenants can access the model.
+
+Both gates are fail-closed — errors in the catalog or user store result in a `500`, never silent pass-through. See [Model Access Control](/governance/model-access/) for full documentation.
 
 ---
 
@@ -173,7 +183,7 @@ buf curl --protocol connect \
   }'
 ```
 
-Supported field mask paths: `enabled`, `displayName`, `inputPerMillion`, `outputPerMillion`, `inputPerMillionHigh`, `outputPerMillionHigh`, `tierThresholdTokens`, `discountPercent`, `category`, `contextWindow`, `aliases`, `allowedTenants`.
+Supported field mask paths: `enabled`, `displayName`, `inputPerMillion`, `outputPerMillion`, `inputPerMillionHigh`, `outputPerMillionHigh`, `tierThresholdTokens`, `discountPercent`, `category`, `contextWindow`, `aliases`, `requiredAccess`, `allowedTenants`.
 
 ### GetModelCatalogEntry
 
