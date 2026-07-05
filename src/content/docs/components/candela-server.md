@@ -11,8 +11,9 @@ description: Full-featured Candela backend with dashboard UI and team management
 |---------|-------------|
 | **LLM Proxy** | Multi-provider routing (OpenAI, Gemini, Anthropic via Vertex AI) |
 | **Span Ingestion** | CQRS storage with DuckDB, SQLite, BigQuery backends |
-| **Cost Engine** | Real-time token counting and cost calculation |
+| **Cost Engine** | Real-time token counting and cost calculation ([`pricing.yaml`](/guides/pricing/#pricing-degradation-chain)) |
 | **Budget Enforcement** _(optional)_ | Per-user spending limits and alerts |
+| **Model Policy** _(optional)_ | [Provider-based allowlist](/governance/model-access/) with glob patterns |
 | **Dashboard** | Next.js UI for traces, costs, and admin |
 | **Auth** | Firebase Auth, Google ID tokens, OAuth2 access tokens |
 
@@ -73,3 +74,5 @@ cd terraform && terraform apply
 - [candela](/components/candela/) — Developer proxy that connects to this server in Team Mode
 - [candela-sidecar](/components/candela-sidecar/) — Lightweight production proxy alternative
 - [Architecture](/architecture/storage/) — CQRS storage design
+- [Pricing](/guides/pricing/) — Cost engine, pricing.yaml, and the degradation chain
+- [Model Access Control](/governance/model-access/) — Restrict which models are available
