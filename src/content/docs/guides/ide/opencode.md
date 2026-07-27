@@ -77,6 +77,7 @@ For native integration with the terminal-based OpenCode assistant, you can insta
 2. **Idle Session Toasts**: Automatically prints a clean, formatted session usage toast (spend, tokens, requests, and cache savings) when the session goes idle.
 3. **Shell Environment Injection**: Automatically exports `CANDELA_PROXY_URL` and `OPENAI_BASE_URL` into any shell tasks spawned by the agent. This ensures scripts, tests, and sub-agents run by OpenCode are tracked automatically.
 4. **Agent Budget Awareness**: Automatically appends the user's current remaining daily budget and active grant status into the context sent to the agent during session compaction. This lets the agent plan tasks and decide whether to use smaller/faster models to conserve your budget.
+5. **Tool Consolidation**: Streamlines agent capabilities into 7 core tools, improving reasoning and reliability.
 
 ### Installation
 
@@ -159,3 +160,42 @@ The model needs a pricing entry in Candela. Contact your admin or add it to the 
 ### Connection Refused on `localhost:8181`
 
 Make sure the Candela server is running (`candela server` or the Cloud Run instance).
+
+## Mission Orchestration Plugin
+
+For multi-step autonomous workflows, install the companion `opencode-missions` plugin.
+
+This plugin provides structured mission orchestration, allowing the agent to plan, execute, and validate complex goals across multiple child sessions.
+
+### Features
+- Breaks down large goals into discrete milestones (`mission_plan`).
+- Dispatches isolated child sessions for focused work (`mission_next`).
+- Validates milestone completion with test commands (`mission_validate`).
+- Tracks progress across sessions and restarts.
+- Exposes 5 core tools for the agent: `mission_plan`, `mission_next`, `mission_validate`, `mission_status`, `mission_cancel`.
+
+### Installation
+
+Install the package in your project:
+
+```bash
+npm install opencode-missions
+```
+
+Then add it to your `.opencode.json`:
+
+```json
+{
+  "plugins": [
+    "opencode-candela",
+    "opencode-missions"
+  ]
+}
+```
+
+### Integration with opencode-candela
+
+When run alongside `opencode-candela`, child sessions spawned by the missions plugin automatically inject the `CANDELA_MISSION_ID` environment variable. This translates to the `X-Mission-Id` HTTP header in API requests, enabling grouped cost tracking and budget attribution for the entire multi-step mission.
+
+[➡️ View on GitHub](https://github.com/candelahq/opencode-missions)
+
