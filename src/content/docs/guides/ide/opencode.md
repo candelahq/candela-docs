@@ -70,7 +70,7 @@ Every prompt and response flows through Candela with full token counting and cos
 
 ## Official Candela OpenCode Plugin
 
-For native integration with the terminal-based OpenCode assistant, you can install the official `opencode-candela` plugin. This plugin hooks directly into OpenCode's execution lifecycle to provide automated budget controls, idle session warnings, shell environment injection, and contextual budget awareness.
+For native integration with the terminal-based OpenCode assistant, you can install the official `@candelahq/opencode` plugin. This plugin hooks directly into OpenCode's execution lifecycle to provide automated budget controls, idle session warnings, shell environment injection, and contextual budget awareness.
 
 ### Key Features
 1. **Startup & Post-Session Budget Warnings**: Displays remaining budget and warning banners at the start of a session and after running automated tasks.
@@ -88,17 +88,17 @@ To register the plugin, choose one of the following methods depending on your wo
 Install the plugin in your project workspace:
 
 ```bash
-npm install opencode-candela
+npm install @candelahq/opencode
 ```
 
-[➡️ View on npm](https://www.npmjs.com/package/opencode-candela)
+[➡️ View on npm](https://www.npmjs.com/package/@candelahq/opencode)
 
 Then, enable it in your local `.opencode.json` configuration:
 
 ```json
 {
   "plugins": [
-    "opencode-candela"
+    "@candelahq/opencode"
   ]
 }
 ```
@@ -109,7 +109,7 @@ If you want the plugin to be active globally across multiple projects, you can c
 
 ```bash
 mkdir -p ~/.config/opencode/plugins/opencode-candela
-cp -r node_modules/opencode-candela/src/* ~/.config/opencode/plugins/opencode-candela/
+cp -r node_modules/@candelahq/opencode/src/* ~/.config/opencode/plugins/opencode-candela/
 ```
 
 Then, add it to your global `~/.config/opencode/config.json`:
@@ -117,7 +117,7 @@ Then, add it to your global `~/.config/opencode/config.json`:
 ```json
 {
   "plugins": [
-    "opencode-candela"
+    "@candelahq/opencode"
   ]
 }
 ```
@@ -128,7 +128,7 @@ You can adjust plugin options in your `.opencode.json` configuration file:
 
 ```json
 {
-  "opencode-candela": {
+  "@candelahq/opencode": {
     "serverUrl": "http://localhost:8181",
     "idleTimeoutSeconds": 60,
     "showStartupWarning": true,
@@ -163,7 +163,7 @@ Make sure the Candela server is running (`candela server` or the Cloud Run insta
 
 ## Mission Orchestration Plugin
 
-For multi-step autonomous workflows, install the companion `opencode-missions` plugin.
+For multi-step autonomous workflows, install the companion `@candelahq/missions` plugin.
 
 This plugin provides structured mission orchestration, allowing the agent to plan, execute, and validate complex goals across multiple child sessions.
 
@@ -179,7 +179,7 @@ This plugin provides structured mission orchestration, allowing the agent to pla
 Install the package in your project:
 
 ```bash
-npm install opencode-missions
+npm install @candelahq/missions
 ```
 
 Then add it to your `.opencode.json`:
@@ -187,15 +187,15 @@ Then add it to your `.opencode.json`:
 ```json
 {
   "plugins": [
-    "opencode-candela",
-    "opencode-missions"
+    "@candelahq/opencode",
+    "@candelahq/missions"
   ]
 }
 ```
 
-### Integration with opencode-candela
+### Integration with `@candelahq/opencode`
 
-When run alongside `opencode-candela`, child sessions spawned by the missions plugin automatically inject the `CANDELA_MISSION_ID` environment variable. This translates to the `X-Mission-Id` HTTP header in API requests, enabling grouped cost tracking and budget attribution for the entire multi-step mission.
+When run alongside `@candelahq/opencode`, child sessions spawned by the missions plugin automatically inject the `CANDELA_MISSION_ID` environment variable. This translates to the `X-Mission-Id` HTTP header in API requests, enabling grouped cost tracking and budget attribution for the entire multi-step mission.
 
-[➡️ View on GitHub](https://github.com/candelahq/opencode-missions)
+[➡️ View on GitHub](https://github.com/candelahq/candela-missions)
 
