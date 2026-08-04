@@ -1,6 +1,6 @@
 ---
 title: OpenCode
-description: Connect OpenCode to Candela for traced AI coding sessions.
+description: Connect OpenCode to Candela for traced AI coding sessions with real-time cost tracking, budget guardrails, and spending intelligence.
 ---
 
 [OpenCode](https://github.com/opencode-ai/opencode) is a terminal-native AI coding agent with MCP support. It uses the OpenAI-compatible API and can be pointed at Candela with minimal config.
@@ -68,74 +68,115 @@ Every prompt and response flows through Candela with full token counting and cos
 
 ---
 
-## Official Candela OpenCode Plugin
+## Official Candela Plugin (v0.7.0)
 
-For native integration with the terminal-based OpenCode assistant, you can install the official `@candelahq/opencode` plugin. This plugin hooks directly into OpenCode's execution lifecycle to provide automated budget controls, idle session warnings, shell environment injection, and contextual budget awareness.
+The official `@candelahq/opencode` plugin hooks directly into OpenCode's execution lifecycle to provide real-time cost visibility, budget guardrails, spending intelligence, and 13 slash commands — all inside your terminal.
 
-### Key Features
-1. **Startup & Post-Session Budget Warnings**: Displays remaining budget and warning banners at the start of a session and after running automated tasks.
-2. **Idle Session Toasts**: Automatically prints a clean, formatted session usage toast (spend, tokens, requests, and cache savings) when the session goes idle.
-3. **Shell Environment Injection**: Automatically exports `CANDELA_PROXY_URL` and `OPENAI_BASE_URL` into any shell tasks spawned by the agent. This ensures scripts, tests, and sub-agents run by OpenCode are tracked automatically.
-4. **Agent Budget Awareness**: Automatically appends the user's current remaining daily budget and active grant status into the context sent to the agent during session compaction. This lets the agent plan tasks and decide whether to use smaller/faster models to conserve your budget.
-5. **Tool Consolidation**: Streamlines agent capabilities into 7 core tools, improving reasoning and reliability.
+[➡️ View on npm](https://www.npmjs.com/package/@candelahq/opencode) · [📦 GitHub](https://github.com/candelahq/opencode-candela)
+
+### Features
+
+| Category | What you get |
+|:---|:---|
+| 💰 **Real-Time Cost Tracking** | Per-response cost deltas, session totals, and 24h spend in status bar and sidebar |
+| 📊 **Budget Monitoring** | Threshold toasts at 80/90/100%, budget pacing forecast, reset countdown |
+| 🔀 **Smart Model Routing** | Opt-in suggestions to swap to cheaper models when budget is tight |
+| 📏 **Context Window Gauge** | Token usage tracking with compaction warnings at 80%+ |
+| 🎯 **Daily Cost Goals** | Set spending targets, track progress with visual pacing |
+| 🛑 **Session Cost Alerts** | Per-session cost tracking with 80%/100% warning toasts |
+| 📈 **Cost Forecasting** | Extrapolate session cost based on current call rate |
+| 🔇 **Quiet Mode** | Suppress info toasts, keep warnings and errors |
+| 🏷️ **Session Tagging** | Tag sessions by activity (auto-detects git branch) |
+| 📂 **Repo Attribution** | Auto-tracks costs per git repository |
+| 📜 **Session History** | Browse past sessions with cost, duration, and tool usage |
+| ⏰ **Time-of-Day Patterns** | Discover when you spend the most |
+| 🛠️ **Tool Cost Breakdown** | See which tools cost the most per call |
+| 📝 **Git Commit Annotation** | Prepare cost metadata for commit messages |
+| 📦 **Export** | JSON + CSV export of session data |
+| 🗄️ **Local Analytics** | JSONL event log with 90-day auto-rotation and 10MB cap |
+
+### Intelligence Layer
+
+Beyond basic tracking, the plugin builds a **spending intelligence profile**:
+
+- **Cost Streaks** — Track consecutive under-budget days
+- **Anomaly Detection** — Alert when session cost is 2x+ your average
+- **Budget Pacing** — Estimate budget exhaustion time from hourly burn rate
+- **Model Efficiency** — Score models by cost-per-call vs effectiveness
+- **Weekly Digest** — Week-over-week spending comparison
+- **Time Patterns** — Morning vs afternoon vs evening vs night cost analysis
 
 ### Installation
-
-To register the plugin, choose one of the following methods depending on your workflow:
-
-#### Option 1: Local Project Registration (Recommended)
-
-Install the plugin in your project workspace:
 
 ```bash
 npm install @candelahq/opencode
 ```
 
-[➡️ View on npm](https://www.npmjs.com/package/@candelahq/opencode)
-
-Then, enable it in your local `.opencode.json` configuration:
+Add to your OpenCode config (`~/.config/opencode/config.json` or `.opencode.json`):
 
 ```json
 {
-  "plugins": [
-    "@candelahq/opencode"
-  ]
+  "plugins": ["@candelahq/opencode"]
 }
 ```
 
-#### Option 2: Global Configuration Registration
+:::tip[Zero config]
+The plugin works out of the box when Candela is running on `localhost:8181`. No additional configuration needed.
+:::
 
-If you want the plugin to be active globally across multiple projects, you can copy the source files to your global OpenCode config:
+### Slash Commands
 
-```bash
-mkdir -p ~/.config/opencode/plugins/opencode-candela
-cp -r node_modules/@candelahq/opencode/src/* ~/.config/opencode/plugins/opencode-candela/
+| Command | Aliases | Description |
+|:---|:---|:---|
+| `/cost` | `/spend` | Session cost + 24h total breakdown |
+| `/budget` | `/remaining` | Budget remaining, grants, reset time |
+| `/models` | — | Top models by spend and call count |
+| `/dashboard` | `/dash` | Open Candela web dashboard |
+| `/export` | `/dump` | Export session data to JSON + CSV |
+| `/goal` | — | Set or view daily cost goal |
+| `/quiet` | `/shh` | Toggle quiet mode |
+| `/tag` | `/label` | Tag session for cost attribution |
+| `/cap` | — | Set per-session cost cap |
+| `/history` | `/sessions` | Browse recent sessions |
+| `/patterns` | `/when` | Time-of-day cost analysis |
+| `/annotate` | `/commit-cost` | Git commit cost metadata |
+| `/tools` | `/tool-cost` | Tool cost breakdown |
+
+### Sidebar Dashboard
+
+The plugin renders a live sidebar with real-time metrics:
+
+```text
+📊 $4.20 · 24h
+🗄️ Cache hit rate: 72%
+🏷️ feat/context-gauge
+⚡ Session: $1.80 · 12 calls
+📈 Forecast: ~$3.30 if 10 more calls
+📏 Context: 45k tokens 🟩 ~35%
+🎯 Goal: $4.20/$20 🟩 21%
+⏱️ Budget exhausted by 4:30 PM
+  claude-sonnet: $2.10 (8 calls)
+  gpt-4o: $1.30 (4 calls)
 ```
 
-Then, add it to your global `~/.config/opencode/config.json`:
+### Environment Variables
 
-```json
-{
-  "plugins": [
-    "@candelahq/opencode"
-  ]
-}
-```
+| Variable | Type | Default | Description |
+|:---|:---|:---|:---|
+| `CANDELA_PROXY_URL` | String | `http://localhost:8181` | Candela proxy URL |
+| `CANDELA_CONFIG` | String | — | Path to Candela config YAML (for port discovery) |
+| `CANDELA_SMART_ROUTING` | Boolean | `false` | Enable cost-conscious model routing |
+| `CANDELA_ROUTING_THRESHOLD` | Float (0–1) | `0.7` | Budget fraction to trigger routing |
+| `CANDELA_ROUTING_SAVINGS_THRESHOLD` | Float (0–1) | `0.5` | Min savings to suggest model swap |
+| `CANDELA_DAILY_GOAL` | Number (USD) | — | Daily spending target |
+| `CANDELA_QUIET` | Boolean | `false` | Suppress info-level toasts |
+| `CANDELA_SESSION_CAP` | Number (USD) | — | Per-session cost alert threshold |
 
-### Configuration Options
+### Settings File
 
-You can adjust plugin options in your `.opencode.json` configuration file:
+Persistent settings at `~/.config/opencode/candela-settings.json`. Resolution priority: **env vars > settings file > defaults**.
 
-```json
-{
-  "@candelahq/opencode": {
-    "serverUrl": "http://localhost:8181",
-    "idleTimeoutSeconds": 60,
-    "showStartupWarning": true,
-    "injectAgentContext": true
-  }
-}
-```
+---
 
 ## Troubleshooting
 
@@ -160,6 +201,8 @@ The model needs a pricing entry in Candela. Contact your admin or add it to the 
 ### Connection Refused on `localhost:8181`
 
 Make sure the Candela server is running (`candela server` or the Cloud Run instance).
+
+---
 
 ## Mission Orchestration Plugin
 
@@ -198,4 +241,3 @@ Then add it to your `.opencode.json`:
 When run alongside `@candelahq/opencode`, child sessions spawned by the missions plugin automatically inject the `CANDELA_MISSION_ID` environment variable. This translates to the `X-Mission-Id` HTTP header in API requests, enabling grouped cost tracking and budget attribution for the entire multi-step mission.
 
 [➡️ View on GitHub](https://github.com/candelahq/candela-missions)
-
