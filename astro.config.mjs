@@ -85,7 +85,7 @@ export default defineConfig({
 							items: [
 								{ label: 'Overview', slug: 'guides/ide/overview' },
 								{ label: 'VS Code Extension', slug: 'guides/ide/vscode' },
-								{ label: 'OpenCode', slug: 'guides/ide/opencode', badge: { text: 'v0.7.0', variant: 'success' } },
+								{ label: 'OpenCode', slug: 'guides/ide/opencode', badge: { text: 'v0.8.0', variant: 'success' } },
 								{ label: 'Zed', slug: 'guides/ide/zed' },
 								{ label: 'Cline / Continue', slug: 'guides/ide/cline' },
 								{ label: 'JetBrains', slug: 'guides/ide/jetbrains', badge: { text: 'New', variant: 'success' } },
