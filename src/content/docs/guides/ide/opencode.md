@@ -83,7 +83,7 @@ The official `@candelahq/opencode` plugin hooks directly into OpenCode's executi
 | 🔀 **Smart Model Routing** | Opt-in suggestions to swap to cheaper models when budget is tight |
 | 📏 **Context Window Gauge** | Token usage tracking with compaction warnings at 80%+ |
 | 🎯 **Daily Cost Goals** | Set spending targets, track progress with visual pacing |
-| 🛑 **Session Cost Caps** | Per-session spending limits with 80%/100% warnings |
+| 🛑 **Session Cost Alerts** | Per-session cost tracking with 80%/100% warning toasts |
 | 📈 **Cost Forecasting** | Extrapolate session cost based on current call rate |
 | 🔇 **Quiet Mode** | Suppress info toasts, keep warnings and errors |
 | 🏷️ **Session Tagging** | Tag sessions by activity (auto-detects git branch) |
@@ -91,7 +91,7 @@ The official `@candelahq/opencode` plugin hooks directly into OpenCode's executi
 | 📜 **Session History** | Browse past sessions with cost, duration, and tool usage |
 | ⏰ **Time-of-Day Patterns** | Discover when you spend the most |
 | 🛠️ **Tool Cost Breakdown** | See which tools cost the most per call |
-| 📝 **Git Commit Annotation** | Embed cost metadata in commit messages |
+| 📝 **Git Commit Annotation** | Prepare cost metadata for commit messages |
 | 📦 **Export** | JSON + CSV export of session data |
 | 🗄️ **Local Analytics** | JSONL event log with 90-day auto-rotation and 10MB cap |
 
@@ -146,7 +146,7 @@ The plugin works out of the box when Candela is running on `localhost:8181`. No 
 
 The plugin renders a live sidebar with real-time metrics:
 
-```
+```text
 📊 $4.20 · 24h
 🗄️ Cache hit rate: 72%
 🏷️ feat/context-gauge
@@ -163,14 +163,14 @@ The plugin renders a live sidebar with real-time metrics:
 
 | Variable | Type | Default | Description |
 |:---|:---|:---|:---|
-| `CANDELA_URL` | String | `http://localhost:8181` | Candela proxy URL |
+| `CANDELA_PROXY_URL` | String | `http://localhost:8181` | Candela proxy URL |
+| `CANDELA_CONFIG` | String | — | Path to Candela config YAML (for port discovery) |
 | `CANDELA_SMART_ROUTING` | Boolean | `false` | Enable cost-conscious model routing |
 | `CANDELA_ROUTING_THRESHOLD` | Float (0–1) | `0.7` | Budget fraction to trigger routing |
 | `CANDELA_ROUTING_SAVINGS_THRESHOLD` | Float (0–1) | `0.5` | Min savings to suggest model swap |
 | `CANDELA_DAILY_GOAL` | Number (USD) | — | Daily spending target |
 | `CANDELA_QUIET` | Boolean | `false` | Suppress info-level toasts |
-| `CANDELA_SESSION_CAP` | Number (USD) | — | Per-session cost limit |
-| `CANDELA_SESSION_TAG` | String | — | Session tag for cost attribution |
+| `CANDELA_SESSION_CAP` | Number (USD) | — | Per-session cost alert threshold |
 
 ### Settings File
 
