@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import starlightBlog from 'starlight-blog';
 
 export default defineConfig({
 	site: process.env.SITE_URL || 'https://candelahq.github.io',
@@ -8,6 +9,19 @@ export default defineConfig({
 	integrations: [
 		starlight({
 			title: 'Candela',
+			plugins: [
+				starlightBlog({
+					title: 'Blog',
+					postCount: 10,
+					recentPostCount: 5,
+					authors: {
+						candela: {
+							name: 'Candela Team',
+							url: 'https://www.candelahq.com',
+						},
+					},
+				}),
+			],
 			logo: {
 				src: './src/assets/logo.png',
 			},
