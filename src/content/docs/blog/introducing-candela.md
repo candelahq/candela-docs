@@ -1,58 +1,96 @@
 ---
-title: "Introducing Candela: Open-Source LLM Cost Tracking"
+title: "The AI Cost Problem Nobody's Tracking"
 date: 2026-08-09
 authors:
   - candela
 tags:
-  - announcement
-  - llm
+  - ai
   - cost-tracking
-excerpt: "AI coding agents are powerful — but expensive. Candela gives you real-time visibility into what you're spending, per model, per session, per team."
+  - opensource
+  - devops
+excerpt: "Every major AI coding tool hides your costs. Here's why that matters and what you can do about it."
 ---
 
-AI coding agents are transforming how developers work. Claude Code, OpenCode, Cursor, Windsurf — they can write, debug, and refactor code at superhuman speed.
+Open Claude Code. Open Cursor. Open Windsurf. Open Copilot.
 
-But they're expensive. And most developers have no idea what they're spending.
+Now tell me: how much did your last coding session cost?
 
-## The Problem
+You can't. None of them show you.
 
-A typical AI coding session costs $2–15 depending on the model, context length, and number of tool calls. Multiply that by a team of 10 engineers, 5 sessions a day, and you're looking at **$5,000–15,000/month** in LLM costs — often with zero visibility into where it's going.
+## The Visibility Gap
 
-Most teams discover this when the invoice arrives.
+AI coding tools have a strange relationship with money. They charge you — sometimes per-seat, sometimes per-token, sometimes through your API key — but they never show you what individual sessions, requests, or tasks actually cost.
 
-## What Candela Does
+Here's what the pricing pages tell you:
 
-Candela is an open-source LLM observability proxy. It sits between your AI tools and your LLM providers, and gives you:
+| Model | Input (per 1M tokens) | Output (per 1M tokens) |
+|-------|----------------------|------------------------|
+| Claude Sonnet 4 | $3.00 | $15.00 |
+| GPT-4.1 | $2.00 | $8.00 |
+| Gemini 2.5 Pro | $1.25 | $10.00 |
 
-- **Real-time cost tracking** — see what every request costs as it happens
-- **Budget enforcement** — set daily, weekly, or per-session spending limits
-- **Model routing** — automatically suggest cheaper models when you're over budget
-- **Per-user attribution** — know who's spending what
-- **Cache analytics** — understand your prompt cache hit rates
+Here's what they don't tell you: how many tokens a typical coding session actually uses. A file read is ~1K tokens. A grep across a codebase is ~5K. A 10-round debug loop with full context replay can hit 200K+. You're multiplying these prices by numbers you can't see.
+
+The result: monthly invoices that are either a relief or a surprise, with no way to understand what drove them.
+
+## Why This Matters
+
+For solo developers, it's an annoyance. For teams, it's a budget problem.
+
+Consider:
+- **No per-session attribution.** You can't tell which task or feature drove a cost spike.
+- **No per-user visibility.** Engineering managers see a total bill, not per-engineer spend.
+- **No budget enforcement.** There's no way to set a daily limit and have the tool respect it.
+- **No model efficiency data.** Are you using Opus for tasks where Haiku would suffice? You'll never know.
+
+Cloud computing went through this exact phase. Early AWS bills were a mystery. Then tools like CloudWatch, Cost Explorer, and third-party observability platforms matured. Teams got visibility, set budgets, and optimized.
+
+LLM spend is where cloud spend was in 2010. The tools don't exist yet.
+
+## Building the Missing Layer
+
+That's why we're building [Candela](https://github.com/candelahq/candela) — an open-source LLM observability proxy.
+
+The idea is simple: Candela sits between your AI tool and your LLM provider. Every request passes through, gets logged with cost/latency/token data, and continues to its destination. No code changes, no SDK integration, no vendor lock-in.
+
+```
+AI Tool  →  Candela Proxy  →  LLM Provider
+                 ↓
+          Cost per request
+          Token counts
+          Cache hit rates
+          Model breakdown
+          Budget enforcement
+```
+
+It works with anything that speaks the OpenAI-compatible API format — which is most AI coding tools today.
+
+## What You Get
+
+**Per-request cost tracking.** Every API call is logged with input tokens, output tokens, model, latency, and computed cost. Not estimated — computed from the actual token counts × the model's pricing.
+
+**Budget enforcement.** Set a daily spending limit. When you hit it, Candela can warn you or block requests. No more surprise invoices.
+
+**Model analytics.** See which models you're using, how often, and what they cost. Spot the $15/day Claude Opus habit when Sonnet would work.
+
+**Cache monitoring.** Prompt caching can cut costs 50-90% — but only if you know your hit rate. Candela tracks cache read/write tokens per request.
 
 ## The OpenCode Plugin
 
-We just shipped `@candelahq/opencode` v0.8.1 — a plugin that brings Candela directly into [OpenCode](https://opencode.ai). Install it with one command:
+We built a plugin that surfaces Candela data directly in [OpenCode](https://opencode.ai):
 
 ```bash
 opencode plugin @candelahq/opencode
 ```
 
-You get:
-- 💰 **7 AI tools** — ask "how much have I spent today?" and the AI knows
-- 📊 **13 slash commands** — `/cost`, `/budget`, `/models`, `/export`, and more
-- 🧠 **Intelligence layer** — spending streaks, anomaly detection, budget pacing
-- 🔀 **Smart routing** — cost-saving model suggestions when you're over budget
+It gives you 7 AI tools (so you can ask "how much have I spent today?" in natural language) and 13 slash commands (`/cost`, `/budget`, `/export`, etc.).
 
-## Getting Started
+The plugin is open source: [`@candelahq/opencode`](https://www.npmjs.com/package/@candelahq/opencode) on npm.
 
-1. Install Candela: `brew install candelahq/tap/candela`
-2. Start the proxy: `candela start`
-3. Add the plugin: `opencode plugin @candelahq/opencode`
-4. Ask: "how much have I spent today?"
+## Get Involved
 
-That's it. You'll never fly blind on AI costs again.
+If you're using AI coding tools professionally, you should know what they cost. Candela is early, open source, and free.
 
----
-
-*Candela is open source. [Star us on GitHub](https://github.com/candelahq/candela) and join the community.*
+- ⭐ [Star the repo](https://github.com/candelahq/candela)
+- 📖 [Read the docs](https://candelahq.github.io/candela-docs/)
+- 💬 Open an issue if you want support for your tool/workflow

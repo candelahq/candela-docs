@@ -3,7 +3,7 @@ title: Candela — LLM Governance Platform
 description: See everything. Enforce anything. Open-source governance for AI workloads.
 template: splash
 hero:
-  tagline: "See everything. Enforce anything. Open-source governance for your AI infrastructure — trace every request, enforce budgets, control model access, and prove compliance."
+  tagline: "Know what your AI costs. Every model, every session, every dollar — tracked in real time. Set up in 60 seconds."
   image:
     alt: Candela — a candle with a neural-network flame
     file: ../../assets/logo.png
@@ -18,7 +18,32 @@ hero:
       variant: minimal
 ---
 
-import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import { Card, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
+
+## Get Started in 60 Seconds
+
+<Steps>
+1. **Install Candela**
+   ```bash
+   brew install candelahq/tap/candela
+   ```
+
+2. **Start the proxy**
+   ```bash
+   candela start
+   ```
+
+3. **See your costs**
+   ```bash
+   # Point any AI tool at localhost:8181
+   # Or install the OpenCode plugin:
+   opencode plugin @candelahq/opencode
+   ```
+</Steps>
+
+[![GitHub stars](https://img.shields.io/github/stars/candelahq/candela?style=social)](https://github.com/candelahq/candela)
+
+---
 
 ## What You Get
 
