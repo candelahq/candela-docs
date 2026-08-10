@@ -68,7 +68,7 @@ Every prompt and response flows through Candela with full token counting and cos
 
 ---
 
-## Official Candela Plugin (v0.8.0)
+## Official Candela Plugin (v0.8.2)
 
 The official `@candelahq/opencode` plugin hooks directly into OpenCode's execution lifecycle to provide real-time cost visibility, budget guardrails, spending intelligence, and 13 slash commands — all inside your terminal.
 
