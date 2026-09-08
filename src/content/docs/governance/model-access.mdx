@@ -84,8 +84,8 @@ Set `required_access` on a `ModelCatalogEntry` to restrict which users can acces
 ```protobuf
 message ModelCatalogEntry {
   // ...existing fields...
-  repeated string required_access = 15;   // tags required to access this model
-  repeated string allowed_tenants = 12;   // tenant IDs allowed to access this model
+  repeated string required_access = 18;  // tags required to access this model
+  repeated string allowed_tenants = 12;  // tenant IDs allowed to access this model
 }
 ```
 

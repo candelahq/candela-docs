@@ -5,12 +5,30 @@ description: Deploy Candela on your own infrastructure — Docker, Cloud Run, or
 
 Candela is designed to run on your infrastructure. This guide covers deploying the server with Docker Compose for local development, Cloud Run for production, and the full configuration reference.
 
-## Prerequisites
+## Deployment Architectures
 
-Before deploying, ensure you have:
+Candela supports two deployment topologies:
+
+1. **Self-Hosted / Zero-Cloud (Air-Gapped)**:
+   - **Span Storage**: Embedded DuckDB (`candela.duckdb`) or SQLite (`candela.db`)
+   - **User & Governance Store**: Embedded SQLite (`candela.db`)
+   - **Model Providers**: Direct API keys (OpenAI, Anthropic, Mistral, DeepSeek, Qwen) or local runtimes (Ollama, vLLM)
+   - **Dependencies**: None. Runs as a single self-contained binary or container without GCP, Firebase, or external databases.
+
+2. **Cloud-Connected / Enterprise (GCP)**:
+   - **Span Storage**: BigQuery (partitioned analytics dataset)
+   - **User & Governance Store**: Cloud Firestore
+   - **Model Providers**: Vertex AI, direct API keys, or hybrid
+   - **Dependencies**: GCP Project, Firebase, IAM service account
+
+---
+
+## Prerequisites (Cloud Mode Only)
+
+If deploying in Cloud-Connected mode with GCP services, ensure you have:
 
 - **GCP project** with billing enabled
-- **Firebase** project linked to your GCP project (for user management and Firestore)
+- **Firebase** project linked to your GCP project (for Firestore-backed user management)
 - **APIs enabled** in your GCP project:
   - Vertex AI API (`aiplatform.googleapis.com`)
   - Cloud Firestore API (`firestore.googleapis.com`)
@@ -18,9 +36,9 @@ Before deploying, ensure you have:
 - **Docker** installed locally (for building images)
 - **gcloud CLI** authenticated (`gcloud auth login`)
 
-### Required IAM Roles
+### Required IAM Roles (Cloud Mode)
 
-The service account running Candela needs these roles:
+The service account running Candela in GCP needs these roles:
 
 | Role | Purpose |
 |------|---------|
@@ -124,7 +142,9 @@ The entrypoint script generates `config.yaml` from environment variables at star
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `CANDELA_STORAGE_BACKEND` | `duckdb` | Storage backend: `duckdb`, `sqlite`, `bigquery` |
+| `CANDELA_STORAGE_BACKEND` | `duckdb` | Span storage backend: `duckdb`, `sqlite`, `bigquery` |
+| `CANDELA_USER_BACKEND` | `sqlite` (or `firestore` if configured) | User & budget storage backend: `sqlite`, `firestore`, `none` |
+| `CANDELA_SQLITE_USER_PATH` | `candela.db` | SQLite database file for user records, budgets, grants, and rate limits |
 | `CANDELA_BQ_PROJECT` | _(empty)_ | BigQuery GCP project ID |
 | `CANDELA_BQ_DATASET` | `candela` | BigQuery dataset name |
 | `CANDELA_BQ_LOCATION` | `US` | BigQuery dataset location |
@@ -144,9 +164,9 @@ The entrypoint script generates `config.yaml` from environment variables at star
 
 ## Storage Backends
 
-### DuckDB (Development)
+### DuckDB (Analytics & Local Development)
 
-DuckDB is an embedded OLAP database — no external services, high-performance analytics, single-file storage.
+DuckDB is an embedded OLAP database — no external services, high-performance columnar analytics, single-file storage.
 
 ```yaml
 storage:
@@ -155,9 +175,11 @@ storage:
     path: "candela.duckdb"
 ```
 
-Best for: local development, single-user setups, demos.
+Best for: local development, single-user setups, high-performance local span queries.
 
-### SQLite
+### SQLite (Lightweight & Testing)
+
+SQLite can be used for span storage in low-concurrency or ephemeral environments:
 
 ```yaml
 storage:
@@ -166,9 +188,9 @@ storage:
     path: "candela.db"  # Use ":memory:" for ephemeral
 ```
 
-### BigQuery (Production)
+### BigQuery (Production Cloud)
 
-BigQuery provides unlimited scale, built-in analytics, and integration with the GCP ecosystem.
+BigQuery provides unlimited scale, partitioned span tables, and deep cost analytics across your enterprise.
 
 ```yaml
 storage:
@@ -180,7 +202,41 @@ storage:
     location: "US"
 ```
 
-Best for: production, multi-user teams, long-term cost analytics.
+Best for: enterprise production, multi-tenant teams, long-term analytics.
+
+---
+
+## User Management & Governance Backends
+
+Candela manages user identities, access tiers, budgets, task spend, and token-bucket rate limits using a pluggable `UserStore`.
+
+### SQLite UserStore (Zero-Cloud / Air-Gapped)
+
+When running self-hosted without Firebase or GCP, Candela defaults to an embedded SQLite `UserStore`. This provides full governance capabilities locally:
+
+- **Users & Status**: Active, suspended, and soft-deleted states
+- **Budgets & Grants**: Daily/monthly spend tracking, automatic overdraft grace, and time-bounded grant waterfalls
+- **Model Limits**: Request and token caps per user and model
+- **Task Budgets**: Scoped budget caps tied to specific agent tasks (`task_id`)
+- **Rate Limiting**: Sliding token-bucket rate limiters per user
+- **Audit Logging**: Structured user and global governance audit trails
+
+```yaml
+user_store:
+  backend: "sqlite"
+  path: "candela.db"
+```
+
+### Firestore UserStore (Enterprise Cloud)
+
+For multi-region, distributed deployments backed by Google Cloud:
+
+```yaml
+firestore:
+  enabled: true
+  project_id: "your-gcp-project-id"
+  database_id: "candela"
+```
 
 ---
 
@@ -264,8 +320,13 @@ pricing:
   #     input_per_million: 2.00
   #     output_per_million: 8.00
 
+# User store configuration (self-hosted / zero-cloud)
+user_store:
+  backend: "sqlite"              # sqlite | firestore | none
+  path: "candela.db"
+
 firestore:
-  enabled: true
+  enabled: false                 # set true to use GCP Firestore for users & budgets
   project_id: ""
   database_id: "candela"
 
