@@ -9,11 +9,11 @@ Candela is designed to run on your infrastructure. This guide covers deploying t
 
 Candela supports two deployment topologies:
 
-1. **Self-Hosted / Zero-Cloud (Air-Gapped)**:
+1. **Self-Hosted / Zero-Cloud**:
    - **Span Storage**: Embedded DuckDB (`candela.duckdb`) or SQLite (`candela.db`)
    - **User & Governance Store**: Embedded SQLite (`candela.db`)
-   - **Model Providers**: Direct API keys (OpenAI, Anthropic, Mistral, DeepSeek, Qwen) or local runtimes (Ollama, vLLM)
-   - **Dependencies**: None. Runs as a single self-contained binary or container without GCP, Firebase, or external databases.
+   - **Model Providers**: Local runtimes (Ollama, vLLM) for air-gapped deployments, or direct API keys (OpenAI, Anthropic, Mistral, DeepSeek, Qwen) when outbound network access is available
+   - **Dependencies**: No GCP, Firebase, or external database dependency; hosted model providers still require outbound network access.
 
 2. **Cloud-Connected / Enterprise (GCP)**:
    - **Span Storage**: BigQuery (partitioned analytics dataset)
