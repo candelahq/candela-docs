@@ -238,6 +238,6 @@ Then add it to your `.opencode.json`:
 
 ### Integration with `@candelahq/opencode`
 
-When run alongside `@candelahq/opencode`, child sessions spawned by the missions plugin automatically inject the `CANDELA_MISSION_ID` environment variable. This translates to the `X-Mission-Id` HTTP header in API requests, enabling grouped cost tracking and budget attribution for the entire multi-step mission.
+When run alongside `@candelahq/opencode`, child sessions spawned by the missions plugin automatically inject the `CANDELA_MISSION_ID` environment variable. This translates to both the `X-Mission-Id` and `X-Candela-Job-Id` HTTP headers on verified Candela proxy requests, enabling grouped cost tracking and budget attribution across the entire multi-step mission.
 
 [➡️ View on GitHub](https://github.com/candelahq/candela-missions)
