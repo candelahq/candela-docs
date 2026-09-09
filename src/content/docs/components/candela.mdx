@@ -127,6 +127,109 @@ iap_service_account: candela-server@project.iam.gserviceaccount.com
   </TabItem>
 </Tabs>
 
+## CLI Command Reference
+
+The `candela` CLI includes developer tools for lifecycle management, live observability, diagnostics, and budget analysis:
+
+### Daemon Management
+
+| Command | Description |
+|---------|-------------|
+| `candela start` | Launch the proxy as a background daemon and write PID file |
+| `candela stop` | Gracefully terminate the running background proxy |
+| `candela restart` | Restart the background proxy with updated configuration |
+| `candela status` | Inspect proxy status, PID, uptime, active model count, and upstream endpoints |
+| `candela run [flags]` | Run proxy in the foreground with stdout logging |
+
+```bash
+# Common flags for 'candela run':
+candela run --config ~/.config/candela/config.yaml --port 8181
+```
+
+### 🩺 Diagnostic Health (`candela doctor`)
+
+Runs an automated suite of system diagnostics to verify runtime compatibility, networking, and authentication.
+
+```bash
+# Standard diagnostic check
+candela doctor
+
+# Output full report in machine-readable JSON (useful for CI/CD or scripts)
+candela doctor --json
+
+# Automatically kill orphan/conflicting processes holding proxy ports
+candela doctor --fix
+```
+
+**Diagnostic Checks Performed**:
+- **Version Check**: Compares local CLI build with latest GitHub release.
+- **Configuration Validation**: Verifies YAML syntax, required fields, and file permissions.
+- **Authentication**: Checks validity of Google ADC and AWS credentials.
+- **Proxy Connectivity**: Confirms local HTTP listeners are healthy and responding.
+- **Remote Server / IAP**: Validates OIDC token generation and remote server reachability.
+- **User & Budget**: Checks active user spend against daily/monthly caps.
+- **Local Runtime**: Detects active Ollama, vLLM, or LM Studio instances and verifies installed models.
+- **State DB**: Validates SQLite schema and database file integrity.
+- **Port Conflicts**: Scans port 8181 and 1234 for conflicting processes.
+
+### 📡 Live Trace Streaming (`candela watch`)
+
+Stream live LLM spans and prompt traces in your terminal in real-time via Server-Sent Events (SSE).
+
+```bash
+# Stream all traces in human-readable table format
+candela watch
+
+# Filter by model or provider
+candela watch --model "claude-sonnet-4-20250514"
+candela watch --provider "google"
+
+# Filter by project ID
+candela watch --project "my-team-project"
+
+# Stream structured JSON lines (NDJSON) for piping to jq or log collectors
+candela watch --json | jq '{model: .model, cost: .cost_usd, latency_ms: .duration_ms}'
+```
+
+### 📈 Budget Runway Forecasting (`candela forecast`)
+
+Analyze your spending velocity and forecast end-of-month spend and budget runway.
+
+```bash
+# Check current user's budget forecast
+candela forecast
+
+# Query forecast for a specific team member
+candela forecast --user "developer@company.com"
+
+# Output forecast metrics as JSON
+candela forecast --json
+```
+
+**Metrics Provided**:
+- **Current Spend & Limit**: Today's spend, month-to-date spend, and configured budget.
+- **Daily Velocity**: 7-day weighted moving average daily cost.
+- **Projected Month-End Spend**: Forecasted total monthly cost at current run rate.
+- **Runway Remaining**: Estimated days until daily or monthly budget exhaustion.
+
+### 🔐 Native Multi-Cloud Authentication (`candela auth`)
+
+Manage native Google Cloud and AWS credentials without installing `gcloud` or `aws` CLI tools:
+
+```bash
+# Authenticate via browser OAuth2
+candela auth login --provider gcp
+candela auth login --provider aws
+
+# Inspect cached token status and expiration
+candela auth status
+
+# Print a fresh authorization token for script integration
+candela auth token --provider gcp
+```
+
+---
+
 ## Full Config Reference
 
 ```yaml
