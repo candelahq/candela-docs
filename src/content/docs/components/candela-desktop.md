@@ -12,6 +12,7 @@ Candela Desktop is a native application for managing LLM providers, visualizing 
 | **Today View** | At-a-glance dashboard showing today's LLM spend, request count, and top models — auto-refreshes every 30s |
 | **Provider Dashboard** | Connect and monitor OpenAI, Google Gemini, Anthropic (Vertex), Ollama, vLLM, LM Studio |
 | **Traces Screen** | Full-screen trace browser with search, filtering, and span-level detail — mirrors the web UI |
+| **Embedded Span Search** | Embedded WebView querying `/spans` on `:8181` for rich, interactive span filtering |
 | **Trace Viewer** | Waterfall view with span hierarchy, timing, token counts, and cost |
 | **Config Editor** | Live YAML editor for `~/.config/candela/config.yaml` with validation |
 | **Mode Switcher** | Toggle between Solo, Solo + Cloud, and Team modes |
@@ -29,8 +30,8 @@ Candela Desktop is a native application for managing LLM providers, visualizing 
 brew install --cask candelahq/tap/candela-desktop
 ```
 
-:::tip
-The Homebrew cask handles Gatekeeper quarantine automatically. If you download the `.dmg` manually, you may need to run `xattr -cr /Applications/Candela.app`.
+:::tip[Architecture & Security]
+The Homebrew cask targets Apple Silicon (`arm64`). On Intel Macs, the app runs via Rosetta 2, or you can install manual release binaries. The cask strips Gatekeeper quarantine flags automatically. If downloading the `.dmg` manually, run `xattr -cr /Applications/Candela.app`.
 :::
 
 ### All Platforms
@@ -88,6 +89,10 @@ The trace viewer displays a waterfall view of distributed traces:
 - **Token counts** — Input and output tokens per LLM call
 - **Cost** — Estimated cost based on provider pricing
 - **Attributes** — Full span attributes including model, provider, and custom metadata
+
+### Embedded Span Search WebView
+
+Candela Desktop integrates an embedded WebView directly wired to the proxy's `/spans` route (`http://127.0.0.1:8181/spans`). This provides rich interactive span searching, model and latency filtering, and deep token inspection without requiring a separate web dashboard process.
 
 ## Architecture
 
