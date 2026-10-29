@@ -91,8 +91,10 @@ export default defineConfig({
 						{ label: 'ADK Integration', slug: 'guides/adk-integration' },
 						{ label: 'OpenTelemetry', slug: 'guides/opentelemetry' },
 						{ label: 'Budgets & Cost Control', slug: 'guides/budgets' },
+						{ label: 'Model Catalog', slug: 'guides/model-catalog' },
 						{ label: 'Pricing', slug: 'guides/pricing' },
 						{ label: 'Prompt Caching', slug: 'guides/prompt-caching' },
+						{ label: 'Self-Hosting Models', slug: 'guides/self-hosting' },
 						{ label: 'Enrichment SDKs', slug: 'guides/enrichment-sdks' },
 						{
 							label: 'IDE Integration',

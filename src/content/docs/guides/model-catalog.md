@@ -78,6 +78,8 @@ Every model in the catalog is represented by an `Entry` with the following field
 | `input_per_million_high` | float | High tier: USD per 1M input tokens (optional) |
 | `output_per_million_high` | float | High tier: USD per 1M output tokens (optional) |
 | `tier_threshold_tokens` | int | Token count threshold for high-tier pricing |
+| `provider_model_id` | string | Upstream provider-specific model ID (e.g. `claude-opus-5-5` on Vertex AI) |
+| `region` | string | Vertex AI region override (e.g. `global`, `us-central1`, `us-east5`) |
 | `aliases` | string[] | Alternative model names that resolve to this entry |
 | `required_access` | string[] | Access tags required to use this model (empty = unrestricted). See [Model Access Control](/governance/model-access/) |
 | `allowed_tenants` | string[] | Tenant IDs allowed to access this model (empty = all tenants). See [Model Access Control](/governance/model-access/) |
@@ -101,7 +103,7 @@ Both gates are fail-closed — errors in the catalog or user store result in a `
 
 ## Seeding the Catalog
 
-The `seed-catalog` CLI populates a Firestore catalog collection with Candela's built-in default pricing. This is the fastest way to bootstrap a Firestore-backed catalog.
+The `seed-catalog` CLI populates a Firestore catalog collection with either Candela's built-in default pricing or an external declarative YAML/JSON file (`--from`). This supports both initial bootstrapping and GitOps catalog synchronization in CI/CD.
 
 ### Usage
 
@@ -111,10 +113,19 @@ go run ./cmd/seed-catalog/ \
   --project-id=your-gcp-project \
   --dry-run
 
-# Seed the catalog
+# Seed from built-in defaults (insert-only via --merge)
 go run ./cmd/seed-catalog/ \
   --project-id=your-gcp-project \
-  --collection=model_catalog
+  --database-id=candela \
+  --collection=model_catalog \
+  --merge
+
+# Declarative GitOps sync from a checked-in YAML file (upserts all listed entries)
+go run ./cmd/seed-catalog/ \
+  --project-id=your-gcp-project \
+  --database-id=candela \
+  --collection=model_catalog \
+  --from=catalog/models.yaml
 ```
 
 ### Flags
@@ -122,13 +133,16 @@ go run ./cmd/seed-catalog/ \
 | Flag | Default | Description |
 |------|---------|-------------|
 | `--project-id` | _(required)_ | GCP project ID for Firestore |
+| `--database-id` | `(default)` | Firestore database ID (e.g. `candela`, `candela-stg`) |
 | `--collection` | `model_catalog` | Firestore collection name |
-| `--dry-run` | `false` | Print entries without writing |
+| `--from` | `""` | Path to an external YAML/JSON catalog file (uses embedded defaults when omitted) |
+| `--merge` | `false` | Insert-only mode: skip entries that already exist in Firestore instead of overwriting |
+| `--dry-run` | `false` | Print entries without writing to Firestore |
 
-The seeder pulls pricing from the built-in `costcalc.Calculator.Defaults()` table — the same data that powers the `config` backend. Each entry is written via `FirestoreStore.Update()`, which performs a full document `Set` (upsert).
+When `--from` is omitted, the seeder pulls pricing from the built-in `costcalc.Calculator.Defaults()` table — the same data that powers the `config` backend. Each entry is written via `FirestoreStore.Update()`, which performs a full document `Set` (upsert) unless `--merge` is specified.
 
 :::note
-Running `seed-catalog` is idempotent. Re-running it updates all entries to the latest built-in pricing without duplicating documents.
+Running `seed-catalog` is idempotent. In GitOps deployments, store your canonical model list in `catalog/models.yaml`, validate it in CI with `--from=catalog/models.yaml --dry-run`, and sync it on merge to `main`.
 :::
 
 ---
