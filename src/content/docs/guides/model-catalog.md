@@ -142,7 +142,7 @@ go run ./cmd/seed-catalog/ \
 When `--from` is omitted, the seeder pulls pricing from the built-in `costcalc.Calculator.Defaults()` table — the same data that powers the `config` backend. Each entry is written via `FirestoreStore.Update()`, which performs a full document `Set` (upsert) unless `--merge` is specified.
 
 :::note
-Running `seed-catalog` is idempotent. In GitOps deployments, store your canonical model list in `catalog/models.yaml`, validate it in CI with `--from=catalog/models.yaml --dry-run`, and sync it on merge to `main`.
+Running `seed-catalog` is idempotent. In GitOps deployments, store your canonical model list in `catalog/models.yaml`, validate it in CI with `--project-id=your-gcp-project --from=catalog/models.yaml --dry-run`, and sync it on merge to `main`.
 :::
 
 ---

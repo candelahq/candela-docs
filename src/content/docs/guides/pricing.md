@@ -161,6 +161,8 @@ Some models have different rates based on input context length. Candela supports
 | **Gemini 2.5 Pro** | 200K tokens | $1.25 / $10.00 (in/out per M) | $2.50 / $15.00 |
 | **Claude Haiku 5.5** | 100K tokens | $0.10 / $0.50 (in/out per M) | $0.50 / $2.50 |
 
+When `input_tokens > tier_threshold_tokens`, input tokens up to and including the threshold are billed at the **Below** (base) rate and only the overflow input tokens are billed at the **Above** (high) rate, while all output tokens for the request are billed at the **Above** output rate. Requests at or below the threshold stay entirely on the base tier.
+
 Tiered pricing is also configurable per-model:
 
 ```yaml
