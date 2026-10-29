@@ -9,7 +9,7 @@ Candela uses a **multi-strategy authentication** system designed to serve three 
 
 ```mermaid
 flowchart TD
-    REQ[Incoming Request] --> SKIP{Path = /healthz?}
+    REQ[Incoming Request] --> SKIP{"Path = /healthz or /readyz?"}
     SKIP -->|yes| PASS[Pass through]
     SKIP -->|no| DEV{Dev Mode?}
     DEV -->|yes| SYNTH["Inject synthetic admin<br/>(admin@localhost)"]
@@ -56,7 +56,7 @@ auth:
     - "candela-ci@my-project.iam.gserviceaccount.com"
 ```
 
-If the `allowed_service_accounts` list is empty or omitted, **all** service accounts are blocked. This prevents unmetered cost vectors — SA traffic bypasses per-user budget deduction.
+If the `allowed_service_accounts` list is empty or omitted, **all** service accounts are blocked. Allowlisted service accounts skip interactive user-store registration and are automatically provisioned with a daily budget (`sa_default_daily_budget_usd`, default $10/day, or overridden per SA via `users/{sa_email}/budgets/config` in Firestore).
 
 ---
 

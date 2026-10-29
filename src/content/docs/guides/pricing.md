@@ -29,9 +29,10 @@ Any model available in your Vertex AI Model Garden or via direct API is supporte
 
 | Provider | Key Models | Auth |
 |----------|-----------|------|
-| **Google Gemini** | Gemini 3.5 Pro/Flash, Gemini 3.1 Pro/Flash, Gemini 2.5 Pro/Flash, Gemini 2.0 Flash | ADC (Vertex AI) |
-| **Anthropic** | Claude Sonnet, Claude Opus, Claude Haiku | ADC (Vertex AI) |
-| **OpenAI** | GPT-4o, o3, o1 | API key |
+| **Google Gemini** | Gemini 4 Argon, Gemini 3.8/3.7/3.6/3.5 Flash, Gemini 3.1 Pro/Flash Lite, Gemini 2.5 Pro/Flash | ADC (Vertex AI) |
+| **Anthropic** | Claude Opus/Sonnet/Haiku 5.5, Claude Opus/Sonnet 5, Claude Opus 4.8/4.7/4.6, Claude Sonnet 4.6, Claude Haiku 4.5 | ADC (Vertex AI) |
+| **OpenAI** | GPT-4.1, GPT-4.1 Mini/Nano, o3, o4-mini, GPT-4o | API key |
+| **Vertex AI MaaS** | xAI Grok 4.6/4.3/4.20, DeepSeek R1 & V3.2, Qwen 3 (235B / Coder 480B), Z.AI GLM 5, Mistral Medium 3 / Codestral 2, Meta Llama 4 Maverick/Scout | ADC (Vertex AI) |
 | **Local** | Llama, Qwen, Mistral, DeepSeek — anything in Ollama | Free ($0.00) |
 
 :::note[Source of truth]
@@ -156,7 +157,11 @@ Some models have different rates based on input context length. Candela supports
 
 | Model | Threshold | Below | Above |
 |-------|-----------|-------|-------|
+| **Gemini 3.1 Pro** | 200K tokens | $2.00 / $12.00 (in/out per M) | $4.00 / $18.00 |
 | **Gemini 2.5 Pro** | 200K tokens | $1.25 / $10.00 (in/out per M) | $2.50 / $15.00 |
+| **Claude Haiku 5.5** | 100K tokens | $0.10 / $0.50 (in/out per M) | $0.50 / $2.50 |
+
+When `input_tokens > tier_threshold_tokens`, input tokens up to and including the threshold are billed at the **Below** (base) rate and only the overflow input tokens are billed at the **Above** (high) rate, while all output tokens for the request are billed at the **Above** output rate. Requests at or below the threshold stay entirely on the base tier.
 
 Tiered pricing is also configurable per-model:
 

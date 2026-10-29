@@ -37,7 +37,7 @@ Request arrives
 - Pre-flight check is **soft** — it checks if _any_ budget remains but doesn't estimate cost (impossible before the call)
 - Deduction is **synchronous** — prevents billing bypass on crash
 - Grants are spent **first** (waterfall: earliest-expiring grant → daily budget)
-- Service accounts **skip** budget checks — they have no budget entries
+- Allowlisted service accounts are **enforced** by the budget gate — auto-provisioned on first request with a daily budget (`sa_default_daily_budget_usd`, default $10/day, or per-SA `budgets/config` overrides in Firestore)
 
 ### Denial Reasons
 
